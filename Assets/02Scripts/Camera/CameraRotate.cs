@@ -20,7 +20,7 @@ public class CameraRotate : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X");
         float mouseY = Input.GetAxis("Mouse Y");
         
-        Debug.Log($"Mouse X: {mouseX}, Mouse Y: {mouseY}");
+        //.Log($"Mouse X: {mouseX}, Mouse Y: {mouseY}");
         
         //2. 회전한 양만큼 누적해나간다.
         _rotationX += mouseX * RotationSpeed * Time.deltaTime;

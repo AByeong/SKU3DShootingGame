@@ -5,6 +5,8 @@ using UnityEngine.Serialization;
 
 public class PlayerFire : MonoBehaviour
 {
+    public CameraFollow CameraShake;
+    
     public Transform FirePosition;
     public BombPool BombPool;
 
@@ -106,6 +108,21 @@ public class PlayerFire : MonoBehaviour
             //4. 레이저를 발사하고 부딪힌 정보가 있다면 피격 이벤트 생성하기
             if (isHit)
             {
+
+                if (hitInfo.collider.CompareTag("Enemy"))
+                {
+                    Enemy enemy = hitInfo.collider.GetComponent<Enemy>();
+                    
+                    Damage damage = new Damage();
+                    damage.Value = 10;
+                    damage.From = this.gameObject;
+                    damage.KnockBackPower = 1f;
+                    damage.HitDirection = hitInfo.normal;
+                    enemy.TakeDamage(damage);
+                    
+                }
+                
+                
                 TrailRenderer trail = Instantiate(BulletTrail, FirePosition.position, Quaternion.identity);
                 StartCoroutine(SpawnTrail(trail, hitInfo));
 
