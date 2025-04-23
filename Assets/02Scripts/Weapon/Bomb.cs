@@ -14,6 +14,18 @@ public class Bomb : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         Instantiate(ExplosionEffectPrefab,this.transform.position,Quaternion.identity);
+
+        if (collision.gameObject.tag == "Enemy")
+        {
+            Damage damage = new Damage();
+            damage.Value = 1;
+            damage.HitDirection = collision.contacts[0].normal;
+            damage.KnockBackPower = 10f;
+            damage.From = this.gameObject;
+
+            collision.gameObject.GetComponent<Enemy>().TakeDamage(damage);
+        }
+
         this.gameObject.SetActive(false);
     }
     
