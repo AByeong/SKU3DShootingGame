@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class playerRotate : MonoBehaviour
 {
+    public PlayerData PlayerData;
    public float RotationSpeed = 150f; //카메라와 똑같이 움직여야함
    private float _rotationX = 0;
 

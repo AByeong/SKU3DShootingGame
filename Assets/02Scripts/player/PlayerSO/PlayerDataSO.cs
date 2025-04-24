@@ -15,6 +15,6 @@ public class PlayerDataSO : ScriptableObject
     public float RunningStamina = -10f;
     public float RollStamina = -10f;
     public float RollPower = 5f;
-    
-    
+
+    public int MaxHealth = 100;
 }

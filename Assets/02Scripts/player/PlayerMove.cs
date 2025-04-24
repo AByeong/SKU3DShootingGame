@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class PlayerMove : MonoBehaviour
 {
-    public PlayerDataSO PlayerData;
+    public PlayerData PlayerData;
 
     [SerializeField]
     private float _moveSpeed = 5f;
@@ -60,12 +60,11 @@ public class PlayerMove : MonoBehaviour
 
     private void Start()
     {
+        _stamina = MaxStamina;
+        
         
         BasicSpeed = PlayerData.BasicSpeed;
         DashSpeed = PlayerData.DashSpeed;
-        
-        _stamina = MaxStamina;
-
         MaxStamina = PlayerData.MaxStamina;
         _needStamina2Roll = PlayerData.NeedStamina2Roll;
         _normalStamina = PlayerData.NormalStamina;

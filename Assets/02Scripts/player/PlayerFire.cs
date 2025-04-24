@@ -3,8 +3,9 @@ using UnityEngine;
 
 public class PlayerFire : MonoBehaviour
 {
+    public PlayerData PlayerData;
+    public CursorInUIZone cursorInUI;
     public CameraManager CameraManager;
-    // public CameraFollow CameraShake; // 추후 카메라 쉐이크(흔들림) 효과를 위한 참조
 
     public Transform FirePosition; // 총알/폭탄이 실제로 생성되는 위치
     public BombPool BombPool;
@@ -52,11 +53,10 @@ public class PlayerFire : MonoBehaviour
         BulletUI.ChangeBulletCount(_currentBulletCount);
 
         _currentChargePower = _minThrowPower; // 충전 파워 초기화
+        
 
-        // 커서 초기 잠금 (추후 CameraManager에서 조정될 수 있음)
-        // 커서 로직을 CameraManager 상태 변경 로직으로 옮기는 것을 고려
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false; // 잠금 상태일 때 커서 숨김
+        //Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.visible = false; // 잠금 상태일 때 커서 숨김
     }
 
     private void Update()
@@ -74,10 +74,11 @@ public class PlayerFire : MonoBehaviour
         if (Input.GetMouseButton(0) && _shotPossible && _currentBulletCount > 0 && _rerollCoroutine == null)
         {
             // 발사 시 재장전 중지
-            // 참고: Reroll() 함수가 필요 시 코루틴 중지를 이미 처리함.
-            // BulletUI.StopReroll(); // 재장전 중단 시 UI가 처리한다고 가정
 
-            FireShot(); // 발사 로직 실행
+            if(!cursorInUI.InUIZone)
+            {
+                FireShot(); // 발사 로직 실행
+            }
         }
         // 탄약이 없고 재장전 중이 아닐 경우 자동으로 재장전 시작
         else if (_currentBulletCount == 0 && _rerollCoroutine == null)
@@ -157,6 +158,22 @@ public class PlayerFire : MonoBehaviour
                         HitDirection = -fireDirection // 적 *방향으로*의 벡터 (피격 방향)
                     };
                     enemy.TakeDamage(damage);
+                }
+            }
+            
+            if (damageHitInfo.collider.CompareTag("Barrel")) // 성능을 위해 CompareTag 사용
+            {
+                Barrel barrel = damageHitInfo.collider.GetComponent<Barrel>();
+                if (barrel != null) // 컴포넌트 존재 여부 확인
+                {
+                    Damage damage = new Damage
+                    {
+                        Value = 10,
+                        From = this.gameObject,
+                        KnockBackPower = 1f,
+                        HitDirection = -fireDirection // 적 *방향으로*의 벡터 (피격 방향)
+                    };
+                    barrel.TakeDamage(damage);
                 }
             }
 

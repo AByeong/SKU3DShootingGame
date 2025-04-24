@@ -6,6 +6,7 @@ TagManager:
   tags:
   - FxTemporaire
   - Enemy
+  - Barrel
   layers:
   - Default
   - TransparentFX
@@ -15,8 +16,8 @@ TagManager:
   - UI
   - Bomb
   - Player
-  - 
-  - 
+  - Enemy
+  - Minimap
   - 
   - 
   - 
