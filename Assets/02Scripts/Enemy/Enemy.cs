@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.AI;
 using Debug = UnityEngine.Debug;
 
 public class Enemy : MonoBehaviour
@@ -33,6 +34,8 @@ public class Enemy : MonoBehaviour
     
     private GameObject _player;                             //플레이어
     private CharacterController _characterController;       //캐릭터 컨트롤러
+
+    private NavMeshAgent _agent;                            //네비메쉬 에이전트
     
     public float MoveSpeed = 3.3f;                          //이동속도
     public float FindDistance = 7f;                         //시야거리
@@ -60,6 +63,7 @@ public class Enemy : MonoBehaviour
         _player = GameObject.FindGameObjectWithTag("Player");
         _characterController = GetComponent<CharacterController>();
         _startPosition = transform.position;
+        _agent = GetComponent<NavMeshAgent>();
     }
 
     private void Update()

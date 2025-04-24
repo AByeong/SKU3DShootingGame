@@ -10,24 +10,31 @@ public class Bomb : MonoBehaviour
     //4. 생성된 수류탄을 카메라 방향으로 물리적인 힘 가하기
     public GameObject ExplosionEffectPrefab;
     //충돌했을 때
+
+    public int ExplosionDamage = 1;
+    public float KnockbackPower = 10f;
     
     private void OnCollisionEnter(Collision collision)
     {
-        Instantiate(ExplosionEffectPrefab,this.transform.position,Quaternion.identity);
-
         if (collision.gameObject.tag == "Enemy")
         {
             Damage damage = new Damage();
-            damage.Value = 1;
+            damage.Value = ExplosionDamage;
             damage.HitDirection = collision.contacts[0].normal;
-            damage.KnockBackPower = 10f;
+            damage.KnockBackPower = KnockbackPower;
             damage.From = this.gameObject;
 
             collision.gameObject.GetComponent<Enemy>().TakeDamage(damage);
         }
+        
+        Explode();
+    }
 
+
+    private void Explode()
+    {
+        Instantiate(ExplosionEffectPrefab,this.transform.position,Quaternion.identity);
         this.gameObject.SetActive(false);
     }
-    
     
 }
