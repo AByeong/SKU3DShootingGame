@@ -180,20 +180,11 @@ public class PlayerFire : MonoBehaviour
              // --- 피격 이펙트 재생 ---
             PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal);
         }
-        else
-        {
-             // 만약 데미지 레이캐스트가 아무것도 맞추지 못했다면, 목표 지점은 조준점으로 유지됨
-             // 디자인에 따라 최대 사거리 지점에서 이펙트를 재생하거나 재생하지 않을 수 있음
-             // PlayImpactEffect(targetPoint, -fireDirection); // 선택 사항: 최대 사거리에서 이펙트 재생
-        }
+        
 
 
         // --- 총알 궤적 생성 ---
         SpawnTrail(FirePosition.position, targetPoint);
-
-
-        // 선택 사항: 여기에 카메라 쉐이크 추가
-        // if (CameraShake != null) { /* StartCoroutine(CameraShake.Shake(...)); */ }
     }
 
     private void FireBomb(float power)
@@ -230,7 +221,7 @@ public class PlayerFire : MonoBehaviour
         switch (CameraManager.CameraView)
         {
             case CameraManager.CameraViewState.FPS:
-            case CameraManager.CameraViewState.TPS:
+
                 // FPS와 TPS의 경우, 조준 광선은 화면 중앙(카메라)에서 시작
                 aimRay = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
                 if (Physics.Raycast(aimRay, out hitInfo, _maxShotDistance))
@@ -245,7 +236,7 @@ public class PlayerFire : MonoBehaviour
                     hitDetected = false;
                 }
                 break;
-
+            case CameraManager.CameraViewState.TPS:
             case CameraManager.CameraViewState.QuerterView: // 원본 스크립트의 오타 유지
                 // 쿼터뷰의 경우, 조준 광선은 카메라에서 마우스 커서 방향으로 시작
                 aimRay = Camera.main.ScreenPointToRay(Input.mousePosition);

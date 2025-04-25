@@ -156,11 +156,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Pool: {fileID: 0}
   Type: 0
-  moveMode: 0
-  PatrolPoints:
-  - {fileID: 8200438495264480530}
-  - {fileID: 588508734651335817}
-  - {fileID: 2701329671011887852}
+  _moveMode: 1
+  PatrolPoints: {fileID: 11400000, guid: 44f9ff9880fcd244688c6c9456e31e4c, type: 2}
   _currentState: 0
   MoveSpeed: 5
   MaxHealth: 10

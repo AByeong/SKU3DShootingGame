@@ -20,7 +20,7 @@ public class Barrel : MonoBehaviour
     [SerializeField] private float _explosionPower = 2f;
     private void Awake()
     {
-        _tweener = transform.DOShakeRotation(0.1f, 1f).SetAutoKill(false).Pause();
+        _tweener = transform.DOShakeRotation(0.1f, 1f).SetAutoKill(false).Pause().SetRelative();
         _rb = GetComponent<Rigidbody>();
     }
 

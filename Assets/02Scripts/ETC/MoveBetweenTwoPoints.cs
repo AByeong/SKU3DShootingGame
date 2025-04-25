@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class MoveBetweenTwoPoints : MonoBehaviour
 {
-    public Transform pointA; // 시작 위치
-    public Transform pointB; // 끝 위치
+    public Vector3 pointA; // 시작 위치
+    public Vector3 pointB; // 끝 위치
     public float speed = 1.0f; // 이동 속도
 
     void Update()
@@ -12,6 +12,6 @@ public class MoveBetweenTwoPoints : MonoBehaviour
         float time = Mathf.PingPong(Time.time * speed, 1f);
 
         // A와 B 사이를 Lerp로 보간
-        transform.position = Vector3.Lerp(pointA.position, pointB.position, time);
+        transform.position = Vector3.Lerp(pointA, pointB, time);
     }
 }

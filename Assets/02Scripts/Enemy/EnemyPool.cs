@@ -1,16 +1,17 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using Random = System.Random;
 
 // Enemy 컴포넌트를 풀링하는 GenericObjectPool을 상속
 public class EnemyPool : GenericObjectPool<Enemy>
 {
      [Tooltip("스폰 활성화 여부")]
      public bool SpawnSwitch = true;
-     [Tooltip("스폰 간격 (초)")]
+     
+     [Header("스폰파라미터")]
      public float SpawnInterval = 2f;
-
-
+     public float Radius = 5f;
      private void Start()
      {
 
@@ -27,8 +28,9 @@ public class EnemyPool : GenericObjectPool<Enemy>
                
                if (enemyInstance != null)
                {
+                    Vector3 enemyPosition = new Vector3(transform.position.x + UnityEngine.Random.Range(0,Radius) , transform.position.y, transform.position.z + UnityEngine.Random.Range(0,Radius));
 
-                    enemyInstance.transform.position = this.transform.position; // 풀 매니저 위치에 스폰
+                    enemyInstance.transform.position = enemyPosition; // 풀 매니저 위치에 스폰
                     enemyInstance.transform.rotation = Quaternion.identity;   // 기본 회전값
 
                      enemyInstance.Initialize(); // Enemy 스크립트에 이런 함수가 있다고 가정

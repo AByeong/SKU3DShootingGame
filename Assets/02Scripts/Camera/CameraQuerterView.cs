@@ -5,17 +5,19 @@ public class CameraQuerterView : MonoBehaviour
 {
     public Transform Target;
 public Vector3 Offset;
+public float Size = 30;
+public Camera Camera;
     private void Start()
-    { Camera camera = this.GetComponent<Camera>();
-        camera.orthographic = true;
-        camera.orthographicSize = 30;
+    { 
+        Camera.orthographic = true;
+        
         Offset = new Vector3(60, 150, -60);
     }
 
     private void Update()
     {
          
-        //interpolling,smoothibg같은 보간 기법이 들어갈 예정
+        Camera.orthographicSize = Size;
         // 쿼터뷰 기본 각도
         
         transform.position = Target.position + Offset;

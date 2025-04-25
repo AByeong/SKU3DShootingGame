@@ -41,8 +41,7 @@ public class Enemy : MonoBehaviour
 
     [Header("정찰")]
     [Tooltip("정찰 지점으로 사용할 자식 오브젝트들의 Transform 목록")]
-    public List<Transform> PatrolPoints = new List<Transform>(); // 자식 오브젝트 Transform 리스트
-    private List<Vector3> _patrolWorldPositions = new List<Vector3>(); // 시작 시 계산될 고정 월드 좌표
+    public PatrolPoints PatrolPoints;
     private int _patrolTargetPointIndex;
 
     [Header("상태 및 기본 설정")]
@@ -108,33 +107,56 @@ public class Enemy : MonoBehaviour
 
     private void Start()
     {
-        Initialize();
+
         
         // 이동 모드 설정 (Awake에서 가져온 컴포넌트 기반)
         SetupMovementMode();
-
-        // 정찰 지점 월드 좌표 저장 (자식 오브젝트 기준)
-        SetupPatrolPositions();
+        
 
         // EnemyType에 따른 초기 상태 설정
         if (Type == EnemyType.Normal)
         {
             // 정찰 지점이 있으면 Patrol, 없으면 Idle 시작
-            _currentState = (_patrolWorldPositions.Count > 0) ? EnemyState.Patrol : EnemyState.Idle;
+            _currentState = (PatrolPoints.patrolPoints.Count > 0) ? EnemyState.Patrol : EnemyState.Idle;
             if (_currentState == EnemyState.Patrol) _patrolTargetPointIndex = 0; // Patrol 시작 시 인덱스 초기화
         }
         else if (Type == EnemyType.Follow)
         {
             _currentState = EnemyState.Trace; // Follow 타입은 바로 추적 시작
         }
+        
+        Initialize();
+        
          Debug.Log($"{gameObject.name} 초기 상태: {_currentState}");
     }
 
     public void Initialize()
     {
         _currentHealth = MaxHealth;
-        _currentState = EnemyState.Idle;
-        _moveMode = MovementMode.CharacterController;
+
+        switch (_moveMode)
+        {
+            case MovementMode.CharacterController:
+                _characterController = GetComponent<CharacterController>();
+                _characterController.enabled = true;
+                break;
+            case MovementMode.NavMeshAgent:
+                _agent = GetComponent<NavMeshAgent>();
+                _agent.enabled = true;
+                break;
+        }
+
+        switch (Type)
+        {
+            case EnemyType.Follow:
+                _currentState = EnemyState.Trace;
+                break;
+            
+            case EnemyType.Normal:
+                _currentState = EnemyState.Idle;
+                break;
+        }
+        
     }
     
 
@@ -177,38 +199,13 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // 정찰 지점 월드 좌표 저장 함수
-    private void SetupPatrolPositions()
-    {
-        _patrolWorldPositions.Clear(); // 리스트 초기화
-        if (PatrolPoints != null)
-        {
-            foreach (Transform point in PatrolPoints)
-            {
-                if (point != null)
-                {
-                    // 자식 Transform의 현재 월드 위치를 저장
-                    _patrolWorldPositions.Add(point.position);
-                    // 필요하다면 정찰 지점 마커를 비활성화
-                    // point.gameObject.SetActive(false);
-                }
-                else
-                {
-                    Debug.LogWarning("PatrolPoints 리스트에 null 항목이 있습니다.", this);
-                }
-            }
-        }
-        if (_patrolWorldPositions.Count == 0)
-        {
-            Debug.LogWarning("유효한 정찰 지점(PatrolPoints)이 설정되지 않았거나 없습니다.", this);
-        }
-    }
+   
+ 
 
 
     private void Update()
     {
-        // 죽었거나 피격 상태일 때는 상태 업데이트 로직 실행 안 함
-        if (_currentState == EnemyState.Die || _currentState == EnemyState.Damaged) return;
+  
 
         // 현재 상태에 따른 함수 호출
         switch (_currentState)
@@ -238,6 +235,11 @@ public class Enemy : MonoBehaviour
                 Attack(); 
                 break;
             }
+            case EnemyState.Damaged:
+                
+                break;
+            case EnemyState.Die:
+                break;
         }
     }
 
@@ -274,7 +276,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // 상태 변경 함수 (디버깅 및 관리 용이)
+    // 상태 변경 함수 
     private void ChangeState(EnemyState newState)
     {
         if (_currentState == newState) return; // 같은 상태로 변경 방지
@@ -282,7 +284,7 @@ public class Enemy : MonoBehaviour
         Debug.Log($"{gameObject.name}: {_currentState} -> {newState}");
         _currentState = newState;
 
-        // 상태 변경 시 필요한 초기화 로직 (예: 타이머 초기화)
+        // 상태 변경 시 필요한 초기화 로직 
         switch (newState)
         {
             case EnemyState.Idle:
@@ -307,12 +309,6 @@ public class Enemy : MonoBehaviour
 
     private void Idle()
     {
-        // NavMeshAgent 사용 시 이동 멈춤 보장
-        if (_moveMode == MovementMode.NavMeshAgent && _agent != null && _agent.enabled && !_agent.isStopped)
-        {
-            _agent.isStopped = true;
-            _agent.ResetPath();
-        }
 
         _idleTimer += Time.deltaTime;
 
@@ -324,7 +320,7 @@ public class Enemy : MonoBehaviour
         }
 
         // 대기 시간 초과 및 정찰 지점 존재 시 Patrol 상태로 전환
-        if (_patrolWorldPositions.Count > 0 && _idleTimer >= IdleTime)
+        if (PatrolPoints.patrolPoints.Count > 0 && _idleTimer >= IdleTime)
         {
             ChangeState(EnemyState.Patrol);
         }
@@ -339,16 +335,14 @@ public class Enemy : MonoBehaviour
             if (_moveMode == MovementMode.NavMeshAgent && _agent != null && _agent.enabled) _agent.ResetPath();
             return;
         }
-
-        // 정찰 지점 없으면 Idle로 전환 (Start에서 이미 체크했지만 안전하게)
-        if (_patrolWorldPositions.Count == 0)
+        
+        if (PatrolPoints.patrolPoints.Count == 0)
         {
-            ChangeState(EnemyState.Idle);
-            return;
+            Type = EnemyType.Follow;
         }
 
         // 목표 정찰 지점 설정
-        Vector3 targetPosition = _patrolWorldPositions[_patrolTargetPointIndex];
+        Vector3 targetPosition = PatrolPoints.patrolPoints[_patrolTargetPointIndex];
 
         // --- 이동 및 도착 판정 로직 ---
         if (_moveMode == MovementMode.NavMeshAgent)
@@ -362,7 +356,7 @@ public class Enemy : MonoBehaviour
                 if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance)
                 {
                     // 다음 지점으로 인덱스 변경
-                    _patrolTargetPointIndex = (_patrolTargetPointIndex + 1) % _patrolWorldPositions.Count;
+                    _patrolTargetPointIndex = (_patrolTargetPointIndex + 1) % PatrolPoints.patrolPoints.Count;
                     // 다음 목적지 설정은 다음 Update에서 SetDestination 호출 시 자동으로 처리됨
                      // Debug.Log($"Patrol: 다음 목표 {_patrolTargetPointIndex}");
                 }
@@ -375,10 +369,8 @@ public class Enemy : MonoBehaviour
                 if (Vector3.Distance(transform.position, targetPosition) <= 0.2f) // 도착 판정
                 {
                     // 다음 지점으로 인덱스 변경
-                     _patrolTargetPointIndex = (_patrolTargetPointIndex + 1) % _patrolWorldPositions.Count;
-                     // Debug.Log($"Patrol: 다음 목표 {_patrolTargetPointIndex}");
-                     // 위치 보정 (선택 사항)
-                     // transform.position = targetPosition;
+                     _patrolTargetPointIndex = (_patrolTargetPointIndex + 1) % PatrolPoints.patrolPoints.Count;
+                     
                 }
                 else
                 {
@@ -421,10 +413,7 @@ public class Enemy : MonoBehaviour
                     _characterController.Move(dir * MoveSpeed * Time.deltaTime);
                     if (dir != Vector3.zero) transform.rotation = Quaternion.LookRotation(dir);
                 }
-                 else // 공격 범위 안이면 이동 멈춤 (선택 사항)
-                 {
-                     // 필요 시 여기에 멈춤 로직 추가 (CC는 자동으로 멈추지 않음)
-                 }
+                
             }
         }
 
@@ -435,15 +424,13 @@ public class Enemy : MonoBehaviour
             if (_moveMode == MovementMode.NavMeshAgent && _agent != null && _agent.enabled)
             {
                 _agent.isStopped = true; // 공격 상태 전 이동 멈춤
-                _agent.ResetPath();
             }
             return;
         }
         else if (shouldReturn)
         {
             ChangeState(EnemyState.Return);
-            if (_moveMode == MovementMode.NavMeshAgent && _agent != null && _agent.enabled) _agent.ResetPath();
-            return;
+            
         }
     }
 
@@ -494,8 +481,6 @@ public class Enemy : MonoBehaviour
             {
                 _agent.isStopped = true;
                 _agent.ResetPath();
-                // Warp으로 NavMesh 위치 동기화 (더 안전)
-                if (_agent.isOnNavMesh) _agent.Warp(_startPosition);
             }
         }
     }
@@ -518,7 +503,6 @@ public class Enemy : MonoBehaviour
         if (Vector3.Distance(transform.position, _player.transform.position) >= AttackDistance)
         {
             ChangeState(EnemyState.Trace);
-            // 이동 재개는 Trace()에서 처리됨
             return;
         }
 
@@ -535,13 +519,6 @@ public class Enemy : MonoBehaviour
     private void PerformAttack()
     {
         Debug.Log("플레이어 공격 실행!");
-        // TODO: 애니메이션 재생, 투사체 발사, 데미지 적용 등 실제 공격 내용 구현
-        // 예시: 플레이어에게 데미지 주기
-        // PlayerHealth playerHealth = _player.GetComponent<PlayerHealth>();
-        // if (playerHealth != null)
-        // {
-        //     playerHealth.TakeDamage(attackPower); // attackPower 변수 필요
-        // }
     }
 
 
@@ -560,41 +537,26 @@ public class Enemy : MonoBehaviour
         // 넉백 이동
         float knockbackDuration = 0.2f; // 넉백 지속 시간
         float elapsedKnockbackTime = 0f;
-
-        while (elapsedKnockbackTime < knockbackDuration && _knockbackForce > 0.01f) // 아주 작은 힘은 무시
-        {
-            // 프레임 이동량 계산 (넉백 힘은 시간에 따라 감소시키지 않음 - 원하면 추가 가능)
+        
+            // 프레임 이동량 계산 
             float moveAmount = _knockbackForce * Time.deltaTime;
 
             if (_moveMode == MovementMode.CharacterController && _characterController != null && _characterController.enabled)
             {
                 _characterController.Move(_knockbackDirection * moveAmount);
             }
-            else // NavMeshAgent 모드 (비활성화 상태) 또는 CC 없음/비활성
+            else 
             {
-                // transform 직접 이동
+                
                 transform.position += _knockbackDirection * moveAmount;
             }
 
             elapsedKnockbackTime += Time.deltaTime;
-            yield return null;
-        }
-
-        // NavMeshAgent 재활성화 (넉백 적용 후, 경직 시간 전)
-        if (agentWasEnabled)
-        {
-            _agent.enabled = true;
-            // 위치 동기화 (중요) - Warp 사용 추천
-            if (_agent.isOnNavMesh)
-                 _agent.Warp(transform.position);
-            else
-                 Debug.LogWarning("넉백으로 인해 Enemy가 NavMesh 밖으로 이동했을 수 있습니다!", this);
-        }
+            
 
         // 남은 경직 시간 대기
         yield return new WaitForSeconds(Mathf.Max(0, DamagedTime - elapsedKnockbackTime));
-
-        // 상태 복귀 (Trace) - Die 상태가 아닐 경우
+        
         if (_currentState == EnemyState.Damaged)
         {
              ChangeState(EnemyState.Trace);
@@ -618,11 +580,7 @@ public class Enemy : MonoBehaviour
         {
             _characterController.enabled = false;
         }
-        // 콜라이더 비활성화
-        Collider col = GetComponent<Collider>();
-        if (col != null) col.enabled = false;
-
-        // TODO: 죽음 애니메이션, 파티클 등 연출
+      
 
         yield return new WaitForSeconds(DeathTime);
 
