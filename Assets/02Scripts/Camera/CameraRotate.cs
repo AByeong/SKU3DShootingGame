@@ -1,7 +1,20 @@
 using UnityEngine; // UnityEngine 네임스페이스 사용
 
+
+
+
 public class CameraRotate : MonoBehaviour
 {
+    
+    
+    public bool GameStarted = false;
+
+    public void ChangeStarting()
+    {
+        Debug.Log("CameraRotate Triggered");
+        GameStarted = !GameStarted;
+    }
+    
     // 카메라 회전 스크립트
     // 목표 : 마우스를 조작하면 카메라(이 스크립트가 부착된 오브젝트)를 그 방향으로 회전시키고 싶다. (주로 FPS 시점용)
 
@@ -66,31 +79,35 @@ public class CameraRotate : MonoBehaviour
     // 매 프레임 호출되는 함수입니다.
     private void Update()
     {
-        // --- 마우스 입력 처리 및 회전 계산 ---
+        if (GameStarted == true)
+        {
 
-        // 1. 마우스의 X축, Y축 이동 값을 입력 시스템으로부터 받습니다.
-        //    Input.GetAxis는 부드러운 입력 값을 반환합니다.
-        float mouseX = Input.GetAxis("Mouse X");
-        float mouseY = Input.GetAxis("Mouse Y");
+            // --- 마우스 입력 처리 및 회전 계산 ---
 
-        // 디버깅을 위해 마우스 입력 값을 콘솔에 출력합니다. (필요 시 주석 해제)
-        // Debug.Log($"Mouse X: {mouseX}, Mouse Y: {mouseY}");
+            // 1. 마우스의 X축, Y축 이동 값을 입력 시스템으로부터 받습니다.
+            //    Input.GetAxis는 부드러운 입력 값을 반환합니다.
+            float mouseX = Input.GetAxis("Mouse X");
+            float mouseY = Input.GetAxis("Mouse Y");
 
-        // 2. 마우스 입력 값, 설정된 회전 속도(RotationSpeed), 그리고 프레임 시간(Time.deltaTime)을 곱하여
-        //    이번 프레임에서의 회전량을 계산하고, 이전 프레임까지 누적된 회전 각도(_rotationX, _rotationY)에 더합니다.
-        //    Time.deltaTime을 곱하는 것은 프레임 속도(FPS)에 관계없이 일정한 속도로 회전하도록 보장합니다.
-        _rotationX += mouseX * RotationSpeed * Time.deltaTime;
-        _rotationY -= mouseY * RotationSpeed * Time.deltaTime; // 마우스 Y축 이동은 일반적으로 반대로 적용해야 위아래 시점 조작이 자연스럽습니다.
+            // 디버깅을 위해 마우스 입력 값을 콘솔에 출력합니다. (필요 시 주석 해제)
+            // Debug.Log($"Mouse X: {mouseX}, Mouse Y: {mouseY}");
 
-        // 3. 수직 회전 각도(_rotationY)의 범위를 제한합니다. (예: -90도 ~ 90도)
-        //    Mathf.Clamp 함수를 사용하여 값이 지정된 최소값과 최대값 사이에 있도록 합니다.
-        //    이를 통해 카메라가 땅을 뚫고 보거나 하늘 위로 완전히 뒤집히는 것을 방지합니다.
-        _rotationY = Mathf.Clamp(_rotationY, -90f, 90f);
+            // 2. 마우스 입력 값, 설정된 회전 속도(RotationSpeed), 그리고 프레임 시간(Time.deltaTime)을 곱하여
+            //    이번 프레임에서의 회전량을 계산하고, 이전 프레임까지 누적된 회전 각도(_rotationX, _rotationY)에 더합니다.
+            //    Time.deltaTime을 곱하는 것은 프레임 속도(FPS)에 관계없이 일정한 속도로 회전하도록 보장합니다.
+            _rotationX += mouseX * RotationSpeed * Time.deltaTime;
+            _rotationY -= mouseY * RotationSpeed * Time.deltaTime; // 마우스 Y축 이동은 일반적으로 반대로 적용해야 위아래 시점 조작이 자연스럽습니다.
+
+            // 3. 수직 회전 각도(_rotationY)의 범위를 제한합니다. (예: -90도 ~ 90도)
+            //    Mathf.Clamp 함수를 사용하여 값이 지정된 최소값과 최대값 사이에 있도록 합니다.
+            //    이를 통해 카메라가 땅을 뚫고 보거나 하늘 위로 완전히 뒤집히는 것을 방지합니다.
+            _rotationY = Mathf.Clamp(_rotationY, -90f, 90f);
 
 
-        // 4. 최종적으로 계산된 누적 회전 각도를 사용하여 이 스크립트가 부착된 게임 오브젝트(카메라)의 Transform을 회전시킵니다.
-        //    transform.eulerAngles 속성에 새로운 Vector3 값을 할당하여 오일러 각으로 회전을 설정합니다.
-        //    X에는 수직 회전값(_rotationY), Y에는 수평 회전값(_rotationX), Z에는 0을 사용합니다.
-        transform.eulerAngles = new Vector3(_rotationY, _rotationX, 0f);
+            // 4. 최종적으로 계산된 누적 회전 각도를 사용하여 이 스크립트가 부착된 게임 오브젝트(카메라)의 Transform을 회전시킵니다.
+            //    transform.eulerAngles 속성에 새로운 Vector3 값을 할당하여 오일러 각으로 회전을 설정합니다.
+            //    X에는 수직 회전값(_rotationY), Y에는 수평 회전값(_rotationX), Z에는 0을 사용합니다.
+            transform.eulerAngles = new Vector3(_rotationY, _rotationX, 0f);
+        }
     }
 }

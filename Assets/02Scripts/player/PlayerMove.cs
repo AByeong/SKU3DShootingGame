@@ -2,11 +2,12 @@ using System;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class PlayerMove : MonoBehaviour
 {
-    public PlayerData PlayerData;
+    [FormerlySerializedAs("PlayerData")] public PlayerCore playerCore;
 
     [SerializeField]
     private float _moveSpeed = 5f;
@@ -48,7 +49,13 @@ public class PlayerMove : MonoBehaviour
     private float _rollStamina = -10f;
 
     private float _rollPower = 5f;
-    
+    public bool GameStarted = false;
+
+    public void ChangeStarting()
+    {
+                  Debug.Log("PlayerMove Triggered");
+        GameStarted = !GameStarted;
+    }
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
@@ -63,28 +70,30 @@ public class PlayerMove : MonoBehaviour
         _stamina = MaxStamina;
         
         
-        BasicSpeed = PlayerData.BasicSpeed;
-        DashSpeed = PlayerData.DashSpeed;
-        MaxStamina = PlayerData.MaxStamina;
-        _needStamina2Roll = PlayerData.NeedStamina2Roll;
-        _normalStamina = PlayerData.NormalStamina;
-        _wallStamina = PlayerData.WallStamina;
-        _runningStamina = PlayerData.RunningStamina;
-        _rollStamina = PlayerData.RollStamina;
-        _rollPower = PlayerData.RollPower;
+        BasicSpeed = playerCore.BasicSpeed;
+        DashSpeed = playerCore.DashSpeed;
+        MaxStamina = playerCore.MaxStamina;
+        _needStamina2Roll = playerCore.NeedStamina2Roll;
+        _normalStamina = playerCore.NormalStamina;
+        _wallStamina = playerCore.WallStamina;
+        _runningStamina = playerCore.RunningStamina;
+        _rollStamina = playerCore.RollStamina;
+        _rollPower = playerCore.RollPower;
+        JumpPower = playerCore.JumpPower;
 
     }
 
     private void Update()
     {
-
-        BasicCharacterMovement();
-        Stamina();
-        Jump();
-        Rolling();
-        CheckOnWall();
-        SetGravity();
-        
+        if (GameStarted == true)
+        {
+            BasicCharacterMovement();
+            Stamina();
+            Jump();
+            Rolling();
+            CheckOnWall();
+            SetGravity();
+        }
 
     }
 

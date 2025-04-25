@@ -9,30 +9,37 @@ public class PlayerRotate : MonoBehaviour
 
     private float _rotationX = 0f;
     private float _rotationY = 0f;
+    public bool GameStarted = false;
 
+    public void ChangeStarting()
+    {
+        Debug.Log("PlayerRotate Triggered");
+        GameStarted = !GameStarted;
+    }
     private void Start()
     {
-        // 초기 회전 각도 설정 (필요하다면)
-        // _rotationY = transform.eulerAngles.y;
     }
 
     private void Update()
     {
-        // 현재 활성화된 카메라 시점에 따라 회전 로직 분기 처리
-        switch (CameraManager.CameraView)
+        if (GameStarted == true)
         {
-            case CameraManager.CameraViewState.FPS:
-                HandleFPSRotation();
-                break;
-            case CameraManager.CameraViewState.TPS:
-                HandleTPSRotation();
-                break;
-            case CameraManager.CameraViewState.QuerterView:
-                HandleQuarterViewRotation();
-                break;
-            default:
-                Debug.LogWarning("알 수 없는 카메라 시점입니다.");
-                break;
+            // 현재 활성화된 카메라 시점에 따라 회전 로직 분기 처리
+            switch (CameraManager.CameraView)
+            {
+                case CameraManager.CameraViewState.FPS:
+                    HandleFPSRotation();
+                    break;
+                case CameraManager.CameraViewState.TPS:
+                    HandleTPSRotation();
+                    break;
+                case CameraManager.CameraViewState.QuerterView:
+                    HandleQuarterViewRotation();
+                    break;
+                default:
+                    Debug.LogWarning("알 수 없는 카메라 시점입니다.");
+                    break;
+            }
         }
     }
 

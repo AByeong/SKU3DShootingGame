@@ -8,11 +8,12 @@ using UnityEngine.Serialization; // NavMeshAgent 사용을 위해 추가
 using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random; // Random 사용을 위해 추가
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour, IDamagable
 {
 
     public EnemyPool Pool;
-    
+
+    public UI_Enemy UIEnemy;
     // 이동 방식 선택을 위한 Enum
     public enum MovementMode
     {
@@ -49,6 +50,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] // Inspector에서 보기 위해 SerializeField 추가
     private EnemyState _currentState = EnemyState.Idle; // 내부 상태 변수
     public EnemyState CurrentState => _currentState; // 외부 읽기 전용 프로퍼티
+    [SerializeField] private int _damage;
     [Tooltip("이동 속도")]
     public float MoveSpeed = 3.3f;
     [Tooltip("최대 체력")]
@@ -156,6 +158,7 @@ public class Enemy : MonoBehaviour
                 _currentState = EnemyState.Idle;
                 break;
         }
+        UIEnemy.Refresh_HPBar(_currentHealth);
         
     }
     
@@ -274,6 +277,8 @@ public class Enemy : MonoBehaviour
             ChangeState(EnemyState.Damaged); // 상태 변경 함수 사용
             _damageCoroutine = StartCoroutine(Damaged_Coroutine());
         }
+        
+        UIEnemy.Refresh_HPBar(_currentHealth);
     }
 
     // 상태 변경 함수 
@@ -518,6 +523,9 @@ public class Enemy : MonoBehaviour
     // 실제 공격 로직 함수 (분리)
     private void PerformAttack()
     {
+        Damage damage = new Damage();
+        damage.Value = _damage;
+        _player.GetComponent<PlayerCore>().TakeDamage(damage);
         Debug.Log("플레이어 공격 실행!");
     }
 
@@ -559,6 +567,17 @@ public class Enemy : MonoBehaviour
         
         if (_currentState == EnemyState.Damaged)
         {
+            switch (_moveMode)
+            {
+                case MovementMode.NavMeshAgent:
+                    _agent.enabled = true;
+                    break;
+                case MovementMode.CharacterController:
+                    _characterController.enabled = true;
+                    break;
+                
+            }
+            
              ChangeState(EnemyState.Trace);
              // 이동 재개는 Trace()에서 처리됨
         }

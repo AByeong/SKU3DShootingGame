@@ -1,9 +1,15 @@
+using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class PlayerData : MonoBehaviour
+public class PlayerCore : MonoBehaviour, IDamagable
 {
     public PlayerDataSO playerData;
-
+    public UI_PlayerHP UIHP;
+    
+    [SerializeField] private Image _bloodImage;
+    
     public float BasicSpeed;
     public float DashSpeed;
     public float MaxStamina;
@@ -14,18 +20,46 @@ public class PlayerData : MonoBehaviour
     public float RollStamina;
     public float RollPower;
     public int MaxHealth;
-    
-    
+    public float JumpPower;
     [SerializeField] private int _currentHealth;
+
+    private Coroutine _bleed;
     public int CurrentHealth{
         get => _currentHealth;
         set => _currentHealth = Mathf.Clamp(value, 0, MaxHealth);
     }
 
 
+    private void Start()
+    {
+        UIHP.Refresh_HPBar(_currentHealth);
+    }
+
     public void TakeDamage(Damage damage)
     {
         _currentHealth -= damage.Value;
+
+        if (_bleed != null)
+        {
+            StopCoroutine(_bleed);
+        }
+        
+        _bleed = StartCoroutine(Bleed());
+        UIHP.Refresh_HPBar(_currentHealth);
+        
+    }
+
+    IEnumerator Bleed()
+    {
+        float bloodAlpha = 1f;
+        _bloodImage.color = new Color(_bloodImage.color.r, _bloodImage.color.g, _bloodImage.color.b, bloodAlpha);
+
+        while (_bloodImage.color.a > 0f)
+        {
+            yield return new WaitForSeconds(0.1f);
+            bloodAlpha -= 0.1f;
+            _bloodImage.color = new Color(_bloodImage.color.r, _bloodImage.color.g, _bloodImage.color.b, bloodAlpha);
+        }
     }
     
     private void Awake()
@@ -41,5 +75,6 @@ public class PlayerData : MonoBehaviour
         RollPower = playerData.RollPower;
         MaxHealth = playerData.MaxHealth;
         _currentHealth = MaxHealth;
+        JumpPower = playerData.JumpPower;
     }
 }

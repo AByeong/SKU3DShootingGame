@@ -1,9 +1,10 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerFire : MonoBehaviour
 {
-    public PlayerData PlayerData;
+    [FormerlySerializedAs("PlayerData")] public PlayerCore playerCore;
     public CursorInUIZone cursorInUI;
     public CameraManager CameraManager;
 
@@ -39,6 +40,14 @@ public class PlayerFire : MonoBehaviour
     private Coroutine _rerollCoroutine; // 재장전 코루틴 참조
     private float _currentChargePower; // 현재 폭탄 충전 파워 추적
 
+    
+    public bool GameStarted = false;
+
+    public void ChangeStarting()
+    {
+        Debug.Log("PlayerFire Triggered");
+        GameStarted = !GameStarted;
+    }
 
     private void Start()
     {
@@ -53,7 +62,6 @@ public class PlayerFire : MonoBehaviour
         BulletUI.ChangeBulletCount(_currentBulletCount);
 
         _currentChargePower = _minThrowPower; // 충전 파워 초기화
-        
 
         //Cursor.lockState = CursorLockMode.Locked;
         //Cursor.visible = false; // 잠금 상태일 때 커서 숨김
@@ -61,9 +69,12 @@ public class PlayerFire : MonoBehaviour
 
     private void Update()
     {
-        HandleShootingInput(); // 발사 입력 처리
-        HandleBombInput();     // 폭탄 입력 처리
-        HandleReloadInput();   // 재장전 입력 처리
+        if (GameStarted == true)
+        {
+            HandleShootingInput(); // 발사 입력 처리
+            HandleBombInput(); // 폭탄 입력 처리
+            HandleReloadInput(); // 재장전 입력 처리
+        }
     }
 
     // --- 입력 처리 ---
@@ -143,39 +154,19 @@ public class PlayerFire : MonoBehaviour
         {
             // 실제 피격 지점을 이펙트 및 궤적 종료 지점으로 사용
             targetPoint = damageHitInfo.point; // 목표 지점을 실제 피격 지점으로 업데이트
+            Damage damage = new Damage
+            {
+                Value = 10,
+                From = this.gameObject,
+                KnockBackPower = 1f,
+                HitDirection = -fireDirection // 적 *방향으로*의 벡터 (피격 방향)
+            };
 
-            // --- 데미지 적용 ---
-            if (damageHitInfo.collider.CompareTag("Enemy")) // 성능을 위해 CompareTag 사용
+            if (damageHitInfo.collider.TryGetComponent<IDamagable>(out IDamagable damagable))
             {
-                Enemy enemy = damageHitInfo.collider.GetComponent<Enemy>();
-                if (enemy != null) // 컴포넌트 존재 여부 확인
-                {
-                    Damage damage = new Damage
-                    {
-                        Value = 10,
-                        From = this.gameObject,
-                        KnockBackPower = 1f,
-                        HitDirection = -fireDirection // 적 *방향으로*의 벡터 (피격 방향)
-                    };
-                    enemy.TakeDamage(damage);
-                }
+                damagable.TakeDamage(damage);
             }
-            
-            if (damageHitInfo.collider.CompareTag("Barrel")) // 성능을 위해 CompareTag 사용
-            {
-                Barrel barrel = damageHitInfo.collider.GetComponent<Barrel>();
-                if (barrel != null) // 컴포넌트 존재 여부 확인
-                {
-                    Damage damage = new Damage
-                    {
-                        Value = 10,
-                        From = this.gameObject,
-                        KnockBackPower = 1f,
-                        HitDirection = -fireDirection // 적 *방향으로*의 벡터 (피격 방향)
-                    };
-                    barrel.TakeDamage(damage);
-                }
-            }
+           
 
              // --- 피격 이펙트 재생 ---
             PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal);

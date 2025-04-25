@@ -16,7 +16,9 @@ public class Bomb : MonoBehaviour
     
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == "Enemy")
+        IDamagable damagable = collision.gameObject.GetComponent<IDamagable>();
+        
+        if (damagable != null)
         {
             Damage damage = new Damage();
             damage.Value = ExplosionDamage;

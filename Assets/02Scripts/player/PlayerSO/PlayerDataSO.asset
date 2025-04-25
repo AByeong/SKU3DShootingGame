@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ace07cd7f4b7264d9b4b44ae37f56cc, type: 3}
   m_Name: PlayerDataSO
   m_EditorClassIdentifier: 
-  BasicSpeed: 5
-  DashSpeed: 10
+  BasicSpeed: 10
+  DashSpeed: 20
   MaxStamina: 100
   NeedStamina2Roll: 10
   NormalStamina: 15
@@ -21,3 +21,5 @@ MonoBehaviour:
   RunningStamina: -10
   RollStamina: -10
   RollPower: 5
+  MaxHealth: 100
+  JumpPower: 5

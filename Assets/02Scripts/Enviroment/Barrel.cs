@@ -2,15 +2,16 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
-public class Barrel : MonoBehaviour
+public class Barrel : MonoBehaviour, IDamagable
 {
     [SerializeField] private int _health = 10;
     [SerializeField] private int _damage = 10;
     private Tweener _tweener;
 
-    public GameObject ExplosionEffect;
+    public GameObject ExplosionEffectPrefab;
     private Rigidbody _rb;
     private bool isExploded = false;
     
@@ -27,41 +28,23 @@ public class Barrel : MonoBehaviour
     private void Explode()
     {
         Debug.Log("EXPLODE");
-        Instantiate(ExplosionEffect,this.transform.position,Quaternion.identity);
+        Instantiate(ExplosionEffectPrefab,this.transform.position,Quaternion.identity);
         
-        Collider[] hitColliders = Physics.OverlapSphere(this.transform.position, _radius);
-        
-        
-        
+        Collider[] hitColliders = Physics.OverlapSphere(this.transform.position, _radius, ~LayerMask.NameToLayer("Barrel"));
+        //Collider[] hitDrumColliders = Physics.OverlapSphere(this.transform.position, _radius, (1 << 10));
         foreach (Collider victim in hitColliders)
         {
 
             isExploded = true;
-            if (victim.CompareTag("Player"))
-            {
-                PlayerData playerData = victim.GetComponent<PlayerData>();
-                Damage damage = new Damage();
-                damage.Value = _damage;
-                
-                playerData.TakeDamage(damage);
-            }
+            Damage damage = new Damage();
+            damage.Value = _damage;
+            
 
-            if (victim.CompareTag("Enemy"))
+            if (victim.TryGetComponent<IDamagable>(out IDamagable damagable))
             {
-                Enemy enemy = victim.GetComponent<Enemy>();
-                Damage damage = new Damage();
-                damage.Value = _damage;
-                
-                enemy.TakeDamage(damage);
+                damagable.TakeDamage(damage);
             }
-
-            if (victim.CompareTag("Barrel"))
-            {
-                Barrel barrel = victim.GetComponent<Barrel>();
-                Damage damage = new Damage();
-                damage.Value = _damage;
-                barrel.TakeDamage(damage);
-            }
+            
         }
         _rb.AddForce(
             new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)).normalized * _explosionPower,
