@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class GameState_Wait : GameState
 {
     [SerializeField] private float WaitTime = 3f;
-    private float _timer = 0f;
+    [SerializeField]private float _timer = 0f;
 
     public override void Excute()
     {
@@ -15,7 +15,7 @@ public class GameState_Wait : GameState
         if (_timer >= WaitTime)
         {
             _timer = 0f;
-            //(GameManager.GameState.Play);
+            ChangeState(GameManager.GameState.Play);
         }
         
     }

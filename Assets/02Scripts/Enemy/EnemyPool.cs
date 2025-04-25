@@ -12,29 +12,35 @@ public class EnemyPool : GenericObjectPool<Enemy>
      [Header("스폰파라미터")]
      public float SpawnInterval = 2f;
      public float Radius = 5f;
+
+
+     private float _timer = 0f;
      
-     public bool GameStarted = false;
 
-     public void ChangeStarting()
-     {
-          GameStarted = !GameStarted;
-     }
-
-     private void Start()
+     private void Update()
      {
           Debug.Log("Enemypool Triggered");
-          StartCoroutine(SpawnEnemy());
+          if (GameManager.Instance.CurrentState == GameManager.GameState.Play && SpawnSwitch)
+          {
+               _timer += Time.deltaTime;
+          }
+
+          if (_timer >= SpawnInterval)
+          {
+               SpawnEnemy();
+               _timer = 0f;
+          }
      }
 
      // 적을 스폰하는 코루틴
-     IEnumerator SpawnEnemy()
+     private void SpawnEnemy()
      {
           // SpawnSwitch가 true인 동안 반복
           while (SpawnSwitch)
           {
-               
+              
 
-               Enemy enemyInstance = GetObjectFromPool();
+                    Enemy enemyInstance = GetObjectFromPool();
 
                     if (enemyInstance != null)
                     {
@@ -52,11 +58,10 @@ public class EnemyPool : GenericObjectPool<Enemy>
                          Debug.LogWarning("EnemyPool에서 사용 가능한 Enemy 인스턴스를 가져오지 못했습니다. 풀 크기나 설정을 확인하세요.");
 
                     }
-
-
-                    yield return new WaitForSeconds(SpawnInterval);
+                    
                }
           
+
      }
 
      // 풀에서 오브젝트를 가져오는 래퍼 함수 (필수는 아님)

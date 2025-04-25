@@ -20,7 +20,7 @@ public class GameState_Start : GameState
     private void StartGame()
     {
         _startCanvas.gameObject.SetActive(false);
-       // ChangeState(GameManager.GameState.Wait);
+        ChangeState(GameManager.GameState.Wait);
         
     }
     

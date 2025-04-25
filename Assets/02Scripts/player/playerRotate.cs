@@ -9,20 +9,14 @@ public class PlayerRotate : MonoBehaviour
 
     private float _rotationX = 0f;
     private float _rotationY = 0f;
-    public bool GameStarted = false;
-
-    public void ChangeStarting()
-    {
-        Debug.Log("PlayerRotate Triggered");
-        GameStarted = !GameStarted;
-    }
+   
     private void Start()
     {
     }
 
     private void Update()
     {
-        if (GameStarted == true)
+        if (GameManager.Instance.CurrentState == GameManager.GameState.Play )
         {
             // 현재 활성화된 카메라 시점에 따라 회전 로직 분기 처리
             switch (CameraManager.CameraView)

@@ -49,13 +49,7 @@ public class PlayerMove : MonoBehaviour
     private float _rollStamina = -10f;
 
     private float _rollPower = 5f;
-    public bool GameStarted = false;
-
-    public void ChangeStarting()
-    {
-                  Debug.Log("PlayerMove Triggered");
-        GameStarted = !GameStarted;
-    }
+    
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
@@ -85,7 +79,7 @@ public class PlayerMove : MonoBehaviour
 
     private void Update()
     {
-        if (GameStarted == true)
+        if (GameManager.Instance.CurrentState == GameManager.GameState.Play )
         {
             BasicCharacterMovement();
             Stamina();

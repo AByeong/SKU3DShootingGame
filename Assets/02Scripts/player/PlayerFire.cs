@@ -41,13 +41,7 @@ public class PlayerFire : MonoBehaviour
     private float _currentChargePower; // 현재 폭탄 충전 파워 추적
 
     
-    public bool GameStarted = false;
-
-    public void ChangeStarting()
-    {
-        Debug.Log("PlayerFire Triggered");
-        GameStarted = !GameStarted;
-    }
+    
 
     private void Start()
     {
@@ -69,7 +63,7 @@ public class PlayerFire : MonoBehaviour
 
     private void Update()
     {
-        if (GameStarted == true)
+        if (GameManager.Instance.CurrentState == GameManager.GameState.Play )
         {
             HandleShootingInput(); // 발사 입력 처리
             HandleBombInput(); // 폭탄 입력 처리

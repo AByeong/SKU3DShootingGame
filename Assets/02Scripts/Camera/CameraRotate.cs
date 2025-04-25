@@ -7,13 +7,7 @@ public class CameraRotate : MonoBehaviour
 {
     
     
-    public bool GameStarted = false;
-
-    public void ChangeStarting()
-    {
-        Debug.Log("CameraRotate Triggered");
-        GameStarted = !GameStarted;
-    }
+    
     
     // 카메라 회전 스크립트
     // 목표 : 마우스를 조작하면 카메라(이 스크립트가 부착된 오브젝트)를 그 방향으로 회전시키고 싶다. (주로 FPS 시점용)
@@ -79,7 +73,7 @@ public class CameraRotate : MonoBehaviour
     // 매 프레임 호출되는 함수입니다.
     private void Update()
     {
-        if (GameStarted == true)
+        if (GameManager.Instance.CurrentState == GameManager.GameState.Play )
         {
 
             // --- 마우스 입력 처리 및 회전 계산 ---
