@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEditor;
-using UnityEngine;
 
 public class MySingleton<T> : MonoBehaviour where T : MonoBehaviour
 {
@@ -8,9 +7,8 @@ public class MySingleton<T> : MonoBehaviour where T : MonoBehaviour
     private static object m_Lock = new object();
     private static T m_Instance;
 
-    // 정적 변수로 초기화 여부를 설정하는 bool
-    private static bool isInitializeOnStart = true; // 기본값은 true, 시작 시 초기화
-    
+    private static bool isInitializeOnStart = true;
+
     public static T Instance
     {
         get
@@ -46,6 +44,33 @@ public class MySingleton<T> : MonoBehaviour where T : MonoBehaviour
             singletonObject.name = typeof(T).Name + " (Singleton)";
             DontDestroyOnLoad(singletonObject);
         }
+        else
+        {
+            // 중복 인스턴스 제거
+            var allInstances = FindObjectsOfType<T>();
+            foreach (var instance in allInstances)
+            {
+                if (instance != m_Instance)
+                {
+                    Debug.LogWarning(typeof(T) + " 중복 인스턴스를 제거합니다.");
+                    Destroy(instance.gameObject);
+                }
+            }
+        }
+    }
+
+    protected virtual void Awake()
+    {
+        if (m_Instance == null)
+        {
+            m_Instance = this as T;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (m_Instance != this)
+        {
+            Debug.LogWarning(typeof(T) + " 싱글톤 인스턴스가 이미 존재합니다. 중복된 인스턴스를 파괴합니다.");
+            Destroy(gameObject);
+        }
     }
 
     private void OnApplicationQuit()
@@ -58,13 +83,11 @@ public class MySingleton<T> : MonoBehaviour where T : MonoBehaviour
         m_ShutingDown = true;
     }
 
-    // 인스펙터에서 값을 설정할 수 있도록 static 메서드 제공
     public static void SetInitializeOnStart(bool value)
     {
         isInitializeOnStart = value;
     }
 
-    // Start()나 다른 함수에서 초기화를 진행할 수도 있도록 변경
     public void InitializeAtRuntime()
     {
         if (!isInitializeOnStart)
@@ -72,12 +95,9 @@ public class MySingleton<T> : MonoBehaviour where T : MonoBehaviour
             InitializeSingleton();
         }
     }
-    
+
     public static bool GetInitializeOnStart()
     {
         return isInitializeOnStart;
     }
 }
-
-
-

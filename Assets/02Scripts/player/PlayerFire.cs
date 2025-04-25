@@ -64,7 +64,7 @@ public class PlayerFire : MonoBehaviour
     private void Update()
     {
         if (GameManager.Instance.CurrentState == GameManager.GameState.Play )
-        {
+               {
             HandleShootingInput(); // 발사 입력 처리
             HandleBombInput(); // 폭탄 입력 처리
             HandleReloadInput(); // 재장전 입력 처리

@@ -19,7 +19,7 @@ public class EnemyPool : GenericObjectPool<Enemy>
 
      private void Update()
      {
-          Debug.Log("Enemypool Triggered");
+//          Debug.Log("Enemypool Triggered");
           if (GameManager.Instance.CurrentState == GameManager.GameState.Play && SpawnSwitch)
           {
                _timer += Time.deltaTime;
