@@ -32,12 +32,10 @@ public class EnemyPool : GenericObjectPool<Enemy>
           }
      }
 
-     // 적을 스폰하는 코루틴
+
      private void SpawnEnemy()
      {
-          // SpawnSwitch가 true인 동안 반복
-          while (SpawnSwitch)
-          {
+          
               
 
                     Enemy enemyInstance = GetObjectFromPool();
@@ -59,7 +57,7 @@ public class EnemyPool : GenericObjectPool<Enemy>
 
                     }
                     
-               }
+               
           
 
      }

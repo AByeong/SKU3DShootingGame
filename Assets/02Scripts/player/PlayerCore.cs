@@ -44,8 +44,15 @@ public class PlayerCore : MonoBehaviour, IDamagable
             StopCoroutine(_bleed);
         }
         
+        
+        
         _bleed = StartCoroutine(Bleed());
         UIHP.Refresh_HPBar(_currentHealth);
+
+        if (_currentHealth <= 0)
+        {
+            GameManager.Instance.CurrentState = GameManager.GameState.Over;
+        }
         
     }
 

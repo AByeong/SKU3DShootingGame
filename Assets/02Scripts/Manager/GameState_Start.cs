@@ -8,6 +8,8 @@ public class GameState_Start : GameState
     [SerializeField] private Button _startButton;
     [SerializeField] private Canvas _startCanvas;
     
+    
+    
     public override void Excute()
     {
         _startCanvas.gameObject.SetActive(true);
