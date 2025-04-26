@@ -7,6 +7,8 @@ public class PlayerFire : MonoBehaviour
     
     
     public PlayerCore PlayerCore;
+    public SwapWeapon SwapWeapon;
+    
     public CursorInUIZone cursorInUI;
     public CameraManager CameraManager;
 
@@ -79,7 +81,8 @@ public class PlayerFire : MonoBehaviour
             HandleShootingInput(); // 발사 입력 처리
             HandleBombInput(); // 폭탄 입력 처리
             HandleReloadInput(); // 재장전 입력 처리
-        }
+            HandleSwapInput();
+               }
     }
 
     // --- 입력 처리 ---
@@ -97,7 +100,23 @@ public class PlayerFire : MonoBehaviour
                 Weapon.Attack();
             }
         }
+        
        
+    }
+
+    private void HandleSwapInput()
+    {
+        
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                SwapWeapon.swap(0);
+            }
+            
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                SwapWeapon.swap(1);
+            }
+        
     }
 
     private void HandleBombInput()
