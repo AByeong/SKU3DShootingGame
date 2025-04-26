@@ -4,7 +4,9 @@ using UnityEngine.Serialization;
 
 public class PlayerFire : MonoBehaviour
 {
-    [FormerlySerializedAs("PlayerData")] public PlayerCore playerCore;
+    
+    
+    public PlayerCore PlayerCore;
     public CursorInUIZone cursorInUI;
     public CameraManager CameraManager;
 
@@ -40,7 +42,16 @@ public class PlayerFire : MonoBehaviour
     private Coroutine _rerollCoroutine; // 재장전 코루틴 참조
     private float _currentChargePower; // 현재 폭탄 충전 파워 추적
 
-    
+
+
+    public enum WeaponType
+    {
+        Gun,
+        Knife
+    }
+
+    [SerializeField] private WeaponType _weaponType;
+    public Weapon Weapon;
     
 
     private void Start()
@@ -76,20 +87,17 @@ public class PlayerFire : MonoBehaviour
     private void HandleShootingInput()
     {
         // 발사 *가능* 상태인지 확인 (재장전 중 아님, 탄약 있음, 쿨타임 완료)
-        if (Input.GetMouseButton(0) && _shotPossible && _currentBulletCount > 0 && _rerollCoroutine == null)
+        if (Input.GetMouseButton(0))
         {
             // 발사 시 재장전 중지
 
             if(!cursorInUI.InUIZone)
             {
-                FireShot(); // 발사 로직 실행
+                //FireShot(); // 발사 로직 실행
+                Weapon.Attack();
             }
         }
-        // 탄약이 없고 재장전 중이 아닐 경우 자동으로 재장전 시작
-        else if (_currentBulletCount == 0 && _rerollCoroutine == null)
-        {
-            Reroll();
-        }
+       
     }
 
     private void HandleBombInput()
@@ -120,57 +128,15 @@ public class PlayerFire : MonoBehaviour
      private void HandleReloadInput()
      {
          // R키를 누르고, 재장전 중이 아니며, 탄약이 최대치가 아닐 때 재장전
-        if (Input.GetKeyDown(KeyCode.R) && _rerollCoroutine == null && _currentBulletCount < _maxBulletCount)
+        if (Input.GetKeyDown(KeyCode.R))
         {
-            Reroll();
+            Weapon.Reroll();
         }
      }
 
     // --- 발사 로직 ---
 
-    private void FireShot()
-    {
-        StartCoroutine(ShotCooldownCoroutine()); // 쿨타임 타이밍 처리
-
-        _currentBulletCount--;
-        BulletUI.ChangeBulletCount(_currentBulletCount);
-
-        Vector3 targetPoint; // 조준 목표 지점
-        Vector3 fireDirection; // 실제 발사 방향
-        bool aimingHit = GetAimTargetPoint(out targetPoint); // 플레이어가 조준하는 위치 가져오기
-
-        // 발사 위치에서 목표 지점까지의 실제 방향 계산
-        fireDirection = (targetPoint - FirePosition.position).normalized;
-
-        // FirePosition에서 데미지 판정을 위한 실제 레이캐스트 수행
-        RaycastHit damageHitInfo;
-        if (Physics.Raycast(FirePosition.position, fireDirection, out damageHitInfo, _maxShotDistance))
-        {
-            // 실제 피격 지점을 이펙트 및 궤적 종료 지점으로 사용
-            targetPoint = damageHitInfo.point; // 목표 지점을 실제 피격 지점으로 업데이트
-            Damage damage = new Damage
-            {
-                Value = 10,
-                From = this.gameObject,
-                KnockBackPower = 1f,
-                HitDirection = -fireDirection // 적 *방향으로*의 벡터 (피격 방향)
-            };
-
-            if (damageHitInfo.collider.TryGetComponent<IDamagable>(out IDamagable damagable))
-            {
-                damagable.TakeDamage(damage);
-            }
-           
-
-             // --- 피격 이펙트 재생 ---
-            PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal);
-        }
-        
-
-
-        // --- 총알 궤적 생성 ---
-        SpawnTrail(FirePosition.position, targetPoint);
-    }
+   
 
     private void FireBomb(float power)
     {
@@ -255,13 +221,7 @@ public class PlayerFire : MonoBehaviour
 
 
     // --- 코루틴 및 효과 ---
-
-    IEnumerator ShotCooldownCoroutine()
-    {
-        _shotPossible = false; // 발사 불가능 상태로 변경
-        yield return new WaitForSeconds(_shotCoolTime); // 설정된 쿨타임만큼 대기
-        _shotPossible = true; // 발사 가능 상태로 복귀
-    }
+    
 
      private void Reroll()
     {

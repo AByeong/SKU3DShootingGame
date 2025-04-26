@@ -92,7 +92,7 @@ public class GenericObjectPool<T> : MonoBehaviour where T : Component
         // 동적 생성이 허용되지 않으면 null 반환 (또는 오류 처리)
         else
         {
-            Debug.Log($"[{typeof(T).Name} Pool] 풀이 비었고 동적 생성이 허용되지 않았습니다!");
+            //Debug.Log($"[{typeof(T).Name} Pool] 풀이 비었고 동적 생성이 허용되지 않았습니다!");
             return null;
         }
     }

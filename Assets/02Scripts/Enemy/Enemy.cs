@@ -129,7 +129,7 @@ public class Enemy : MonoBehaviour, IDamagable
         
         Initialize();
         
-         Debug.Log($"{gameObject.name} 초기 상태: {_currentState}");
+//         Debug.Log($"{gameObject.name} 초기 상태: {_currentState}");
     }
 
     public void Initialize()
@@ -175,7 +175,7 @@ public class Enemy : MonoBehaviour, IDamagable
                 _agent.speed = MoveSpeed;
                 _agent.stoppingDistance = AttackDistance * 0.8f; // 기본 멈춤 거리 (추적/공격용)
                 if (_characterController != null) _characterController.enabled = false; // CC 비활성화
-                Debug.Log("NavMeshAgent 모드로 시작", this);
+//                Debug.Log("NavMeshAgent 모드로 시작", this);
             }
             else // NavMeshAgent 컴포넌트 없음
             {

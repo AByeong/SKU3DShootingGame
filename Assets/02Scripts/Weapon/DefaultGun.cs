@@ -1,14 +1,20 @@
+using System.Collections;
 using UnityEngine;
 
 public class DefaultGun : Weapon
 {
-    public override void Fire()
+    public override void Initialize()
     {
-        
-            StartCoroutine(ShotCooldownCoroutine()); // 쿨타임 타이밍 처리
+        CurrentAmmo = MaxBulletCount;
+    }
+    
+   public override void Fire()
+    {
 
-            _currentBulletCount--;
-            BulletUI.ChangeBulletCount(_currentBulletCount);
+        if (CurrentAmmo > 0)
+        {
+            CurrentAmmo--;
+            BulletUI.ChangeBulletCount(CurrentAmmo);
 
             Vector3 targetPoint; // 조준 목표 지점
             Vector3 fireDirection; // 실제 발사 방향
@@ -19,7 +25,7 @@ public class DefaultGun : Weapon
 
             // FirePosition에서 데미지 판정을 위한 실제 레이캐스트 수행
             RaycastHit damageHitInfo;
-            if (Physics.Raycast(FirePosition.position, fireDirection, out damageHitInfo, _maxShotDistance))
+            if (Physics.Raycast(FirePosition.position, fireDirection, out damageHitInfo, MaxShotDistance))
             {
                 // 실제 피격 지점을 이펙트 및 궤적 종료 지점으로 사용
                 targetPoint = damageHitInfo.point; // 목표 지점을 실제 피격 지점으로 업데이트
@@ -35,85 +41,37 @@ public class DefaultGun : Weapon
                 {
                     damagable.TakeDamage(damage);
                 }
-           
+
 
                 // --- 피격 이펙트 재생 ---
-                PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal);
+                if (BulletEffect != null)
+                {
+                    PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal);
+                }
             }
-        
+
 
 
             // --- 총알 궤적 생성 ---
             SpawnTrail(FirePosition.position, targetPoint);
         }
-    
-    private bool GetAimTargetPoint(out Vector3 targetPoint)
-    {
-        Ray aimRay; // 조준 광선
-        bool hitDetected = false; // 충돌 감지 여부
-        RaycastHit hitInfo; // 충돌 정보
 
-        switch (CameraManager.CameraView)
-        {
-            case CameraManager.CameraViewState.FPS:
-
-                // FPS와 TPS의 경우, 조준 광선은 화면 중앙(카메라)에서 시작
-                aimRay = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
-                if (Physics.Raycast(aimRay, out hitInfo, _maxShotDistance))
-                {
-                    targetPoint = hitInfo.point;
-                    hitDetected = true;
-                }
-                else
-                {
-                    // 맞춘 대상이 없으면, 카메라 전방 방향으로 멀리 떨어진 지점을 조준
-                    targetPoint = aimRay.origin + aimRay.direction * _maxShotDistance;
-                    hitDetected = false;
-                }
-                break;
-            case CameraManager.CameraViewState.TPS:
-            case CameraManager.CameraViewState.QuerterView: // 원본 스크립트의 오타 유지
-                // 쿼터뷰의 경우, 조준 광선은 카메라에서 마우스 커서 방향으로 시작
-                aimRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                // FirePosition의 높이에 있는 평면에 투영
-                Plane aimPlane = new Plane(Vector3.up, FirePosition.position);
-                float distance;
-                if (aimPlane.Raycast(aimRay, out distance))
-                {
-                    targetPoint = aimRay.GetPoint(distance);
-                    // 선택 사항: FirePosition에서 targetPoint로 2차 레이캐스트 추가하여
-                    // *실제* 발사 경로가 막혔는지 확인 (하지만 평면 지점을 조준하는 것이 더 간단함)
-                    hitDetected = true; // 기술적으로는 평면에 맞음
-                }
-                else
-                {
-                    // 평면 레이캐스트 실패 시 대체 처리 (예: 평면과 평행하게 바라볼 때)
-                    // 백업으로 FirePosition에서 정면으로 조준
-                    targetPoint = FirePosition.position + transform.forward * _maxShotDistance; // 플레이어의 전방 방향 사용
-                     hitDetected = false;
-                }
-                break;
-
-            default:
-                Debug.LogError("GetAimTargetPoint에서 처리되지 않은 CameraViewState!");
-                targetPoint = FirePosition.position + transform.forward * _maxShotDistance; // 기본 대체 처리
-                hitDetected = false;
-                break;
-        }
-        return hitDetected;
     }
+
     
-    
+
+    //***************피격 이팩트 재생**********
     private void PlayImpactEffect(Vector3 position, Vector3 normal)
     {
-        if (BulletEffect != null)
-        {
+        
             BulletEffect.transform.position = position; // 이펙트 위치 설정
             BulletEffect.transform.forward = normal; // 표면 노멀(법선)에 맞춰 이펙트 정렬
             BulletEffect.Play(); // 이펙트 재생
-        }
+        
     }
     
+    
+    //*******궤적 그리기****
     private void SpawnTrail(Vector3 startPoint, Vector3 endPoint)
     {
         if (BulletTrailPrefab != null) // 궤적 프리팹이 할당되었는지 확인
@@ -124,7 +82,6 @@ public class DefaultGun : Weapon
             StartCoroutine(MoveTrailCoroutine(trail, endPoint));
         }
     }
-    
     private IEnumerator MoveTrailCoroutine(TrailRenderer trail, Vector3 endPoint)
     {
         float time = 0; // 경과 시간 (0 to 1)
@@ -151,4 +108,29 @@ public class DefaultGun : Weapon
         // 선택적으로 파괴를 지연시키거나 트레일이 자연스럽게 사라지도록 함 (TrailRenderer의 시간 사용)
         Destroy(trail.gameObject, trailTime);
     }
+    
+
+   
+   
+   
+    public override void Reroll()
+    {
+        Debug.Log("Reroll!!");
+        // 이미 재장전 중이라면, 또 시작하지 않음
+        if (RerollCoroutine != null || CurrentAmmo == MaxBulletCount) return;
+
+        BulletUI.StartReroll(RerollCoolTime); // UI에 재장전 진행 상황 표시 요청
+        RerollCoroutine = StartCoroutine(Reroll_Coroutine()); // 재장전 코루틴 시작 및 참조 저장
+    }
+    
+    IEnumerator Reroll_Coroutine()
+    {
+        yield return new WaitForSeconds(RerollCoolTime); // 설정된 재장전 시간만큼 대기
+        CurrentAmmo = MaxBulletCount; // 탄약 수를 최대로 채움
+        BulletUI.ChangeBulletCount(CurrentAmmo); // 재장전 후 UI 업데이트
+        BulletUI.StopReroll(); // UI에 재장전 완료 알림
+        RerollCoroutine = null; // 코루틴 참조 제거
+        Debug.Log("RerollEnd!!");
+    }
+   
 }
