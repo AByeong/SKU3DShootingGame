@@ -10,6 +10,8 @@ public class PlayerRotate : MonoBehaviour
     private float _rotationX = 0f;
     private float _rotationY = 0f;
    
+    
+    
     private void Start()
     {
     }
@@ -37,6 +39,11 @@ public class PlayerRotate : MonoBehaviour
         }
     }
 
+    public void ShakeCamera()
+    {
+
+    }
+    
     private void HandleFPSRotation()
     {
         float mouseX = Input.GetAxis("Mouse X");

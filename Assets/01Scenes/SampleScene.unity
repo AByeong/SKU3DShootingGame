@@ -1120,6 +1120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RotationSpeed: 150
+  PlayerTransform: {fileID: 0}
 --- !u!114 &1742311326
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1251,6 +1252,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 1270928622}
+  Offset: {x: 0, y: 0, z: 0}
 --- !u!1 &1840147962
 GameObject:
   m_ObjectHideFlags: 0
@@ -1669,6 +1671,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RotationSpeed: 150
+  CameraManager: {fileID: 0}
+  MainCamera: {fileID: 0}
 --- !u!114 &2089393682
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1681,7 +1685,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 823cf06e27704644cad2987186026adc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerData: {fileID: 0}
+  playerCore: {fileID: 0}
   _moveSpeed: 5
   BasicSpeed: 7
   DashSpeed: 10
@@ -1729,10 +1733,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e49abdeaa52cfa54099d29d9e14cd3d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CameraFollow: {fileID: 0}
+  PlayerCore: {fileID: 0}
+  SwapWeapon: {fileID: 0}
+  cursorInUI: {fileID: 0}
+  CameraManager: {fileID: 0}
   FirePosition: {fileID: 1165776339}
-  BombPrefab: {fileID: 7097856952781430438, guid: a014d9f99eebfaf4bbcf057323148886, type: 3}
+  BombPool: {fileID: 0}
   ThrowPower: 15
   BulletEffect: {fileID: 2004277351}
+  BombUI: {fileID: 0}
+  BulletUI: {fileID: 0}
+  _maxBombCount: 3
+  _minThrowPower: 3
+  _maxThrowPower: 30
+  _chargeRate: 10
+  _maxBulletCount: 50
+  _shotCoolTime: 0.2
+  _rerollCoolTime: 2
+  _maxShotDistance: 100
+  BulletTrailPrefab: {fileID: 0}
+  _weaponType: 0
+  Weapon: {fileID: 0}
 --- !u!1001 &8202411919168739076
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -17,12 +17,10 @@ public class PlayerCore : MonoBehaviour, IDamagable
     public float NormalStamina;
     public float WallStamina;
     public float RunningStamina;
-    public float RollStamina;
     public float RollPower;
     public int MaxHealth;
     public float JumpPower;
     [SerializeField] private int _currentHealth;
-
     private Coroutine _bleed;
     public int CurrentHealth{
         get => _currentHealth;
@@ -78,10 +76,19 @@ public class PlayerCore : MonoBehaviour, IDamagable
         NormalStamina = playerData.NormalStamina;
         WallStamina = playerData.WallStamina;
         RunningStamina = playerData.RunningStamina;
-        RollStamina = playerData.RollStamina;
         RollPower = playerData.RollPower;
         MaxHealth = playerData.MaxHealth;
         _currentHealth = MaxHealth;
         JumpPower = playerData.JumpPower;
+        _animator = GetComponentInChildren<Animator>();
+    }
+private Animator _animator;
+    private void Update()
+    {
+         _animator.SetLayerWeight(0, _currentHealth / MaxHealth);
+         _animator.SetLayerWeight(2, 1 - _currentHealth / MaxHealth);
+         Debug.Log($"0Layer : {_currentHealth / MaxHealth}," +
+                   $"1Layer : {1 - _currentHealth / MaxHealth}");
+        
     }
 }

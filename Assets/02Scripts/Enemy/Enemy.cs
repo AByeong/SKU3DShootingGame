@@ -10,7 +10,7 @@ using Random = UnityEngine.Random; // Random 사용을 위해 추가
 
 public class Enemy : MonoBehaviour, IDamagable
 {
-
+private Animator _animator;
     public EnemyPool Pool;
 
     public UI_Enemy UIEnemy;
@@ -109,7 +109,7 @@ public class Enemy : MonoBehaviour, IDamagable
 
     private void Start()
     {
-
+_animator = GetComponentInChildren<Animator>();
         
         // 이동 모드 설정 (Awake에서 가져온 컴포넌트 기반)
         SetupMovementMode();
@@ -269,11 +269,13 @@ public class Enemy : MonoBehaviour, IDamagable
 
         if (_currentHealth <= 0)
         {
+            _animator.SetTrigger("Die");
             ChangeState(EnemyState.Die); // 상태 변경 함수 사용
             StartCoroutine(Die_Coroutine());
         }
         else
         {
+            _animator.SetTrigger("Hit");
             ChangeState(EnemyState.Damaged); // 상태 변경 함수 사용
             _damageCoroutine = StartCoroutine(Damaged_Coroutine());
         }
@@ -327,6 +329,7 @@ public class Enemy : MonoBehaviour, IDamagable
         // 대기 시간 초과 및 정찰 지점 존재 시 Patrol 상태로 전환
         if (PatrolPoints.patrolPoints.Count > 0 && _idleTimer >= IdleTime)
         {
+            _animator.SetTrigger("IdleToMove");
             ChangeState(EnemyState.Patrol);
         }
     }
@@ -425,6 +428,7 @@ public class Enemy : MonoBehaviour, IDamagable
         // 상태 전환
         if (isInAttackRange)
         {
+            _animator.SetTrigger("MoveToAttackDelay");
             ChangeState(EnemyState.Attack);
             if (_moveMode == MovementMode.NavMeshAgent && _agent != null && _agent.enabled)
             {
@@ -434,6 +438,7 @@ public class Enemy : MonoBehaviour, IDamagable
         }
         else if (shouldReturn)
         {
+            _animator.SetTrigger("MoveToIdle");
             ChangeState(EnemyState.Return);
             
         }
@@ -495,6 +500,7 @@ public class Enemy : MonoBehaviour, IDamagable
         // NavMeshAgent 사용 시 이동 멈춤 보장
         if (_moveMode == MovementMode.NavMeshAgent && _agent != null && _agent.enabled && !_agent.isStopped)
         {
+           
             _agent.isStopped = true;
             _agent.ResetPath();
         }
@@ -507,6 +513,7 @@ public class Enemy : MonoBehaviour, IDamagable
         // 공격 거리 벗어나면 Trace 상태로 전환
         if (Vector3.Distance(transform.position, _player.transform.position) >= AttackDistance)
         {
+            _animator.SetTrigger("AttackDelayToMove");
             ChangeState(EnemyState.Trace);
             return;
         }
@@ -516,19 +523,25 @@ public class Enemy : MonoBehaviour, IDamagable
         if (_attackTimer >= AttackCoolTime)
         {
             _attackTimer = 0;
-            PerformAttack(); // 실제 공격 실행 함수 호출
+           PerformAttack(); // 실제 공격 실행 함수 호출
         }
     }
 
     // 실제 공격 로직 함수 (분리)
     private void PerformAttack()
     {
-        Damage damage = new Damage();
-        damage.Value = _damage;
-        _player.GetComponent<PlayerCore>().TakeDamage(damage);
+        _animator.SetTrigger("AttackDelayToAttack");
+        
+        
         Debug.Log("플레이어 공격 실행!");
     }
 
+    public void Hit()
+    {
+        Damage damage = new Damage();
+        damage.Value = _damage;
+        _player.GetComponent<PlayerCore>().TakeDamage(damage);
+    }
 
     // --- 코루틴 ---
 

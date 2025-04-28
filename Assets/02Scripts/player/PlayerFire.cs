@@ -4,8 +4,8 @@ using UnityEngine.Serialization;
 
 public class PlayerFire : MonoBehaviour
 {
-    
-    
+    private Animator _animator;
+    public CameraFollow CameraFollow;
     public PlayerCore PlayerCore;
     public SwapWeapon SwapWeapon;
     
@@ -43,7 +43,7 @@ public class PlayerFire : MonoBehaviour
     private bool _shotPossible = true; // 발사 가능 여부
     private Coroutine _rerollCoroutine; // 재장전 코루틴 참조
     private float _currentChargePower; // 현재 폭탄 충전 파워 추적
-
+    private Coroutine _reboundCoroutine;
 
 
     public enum WeaponType
@@ -54,7 +54,11 @@ public class PlayerFire : MonoBehaviour
 
     [SerializeField] private WeaponType _weaponType;
     public Weapon Weapon;
-    
+
+    private void Awake()
+    {
+        _animator = GetComponentInChildren<Animator>();
+    }
 
     private void Start()
     {
@@ -96,7 +100,16 @@ public class PlayerFire : MonoBehaviour
 
             if(!cursorInUI.InUIZone)
             {
+                if (_reboundCoroutine != null)
+                {
+                    StopCoroutine(_reboundCoroutine);
+                }
+
+                //_reboundCoroutine = StartCoroutine(Rebound_Coroutine());
                 //FireShot(); // 발사 로직 실행
+                
+                
+                
                 Weapon.Attack();
             }
         }
@@ -104,17 +117,42 @@ public class PlayerFire : MonoBehaviour
        
     }
 
+    /*IEnumerator Rebound_Coroutine()
+    {
+        Vector3 startOffset = Weapon.ReboundOffset;
+        Vector3 targetOffset = Vector3.zero;
+        float duration = 0.5f; // 0.5초 동안 부드럽게 이동
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            CameraFollow.Offset = Vector3.Lerp(startOffset, targetOffset, t);
+            yield return null;
+        }
+
+        // 최종적으로 정확히 Zero로 맞춰줍니다
+        CameraFollow.Offset = Vector3.zero;
+    }
+    */
+    
+    
+    
+
     private void HandleSwapInput()
     {
         
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
                 SwapWeapon.swap(0);
+                _animator.SetInteger("Weapon",0);
             }
             
             if (Input.GetKeyDown(KeyCode.Alpha2))
             {
                 SwapWeapon.swap(1);
+                _animator.SetInteger("Weapon",1);
             }
         
     }
@@ -128,7 +166,8 @@ public class PlayerFire : MonoBehaviour
             {
                 _currentChargePower += Time.deltaTime * _chargeRate;
                 _currentChargePower = Mathf.Min(_currentChargePower, _maxThrowPower); // 최대값으로 제한
-                // 선택 사항: 충전 레벨을 표시하도록 UI 업데이트
+                // 충전 레벨을 표시하도록 UI 업데이트
+                BombUI.ChargeBomb(_currentChargePower/_maxThrowPower);
             }
         }
 
@@ -139,7 +178,8 @@ public class PlayerFire : MonoBehaviour
             {
                 FireBomb(_currentChargePower); // 충전된 파워 전달
                 _currentChargePower = _minThrowPower; // 충전 상태 초기화
-                // 선택 사항: 충전 UI 초기화
+                //충전 UI 초기화
+                BombUI.ChargeBomb(0);
             }
         }
     }

@@ -7,8 +7,8 @@ using UnityEngine.UI;
 
 public class PlayerMove : MonoBehaviour
 {
-    [FormerlySerializedAs("PlayerData")] public PlayerCore playerCore;
-
+    public PlayerCore playerCore;
+private Animator _animator;
     [SerializeField]
     private float _moveSpeed = 5f;
     
@@ -43,10 +43,10 @@ public class PlayerMove : MonoBehaviour
     private bool _isRunning = false;
 
 
+
     private float _normalStamina = 15f;
     private float _wallStamina = -10f;
     private float _runningStamina = -10f;
-    private float _rollStamina = -10f;
 
     private float _rollPower = 5f;
     
@@ -54,7 +54,7 @@ public class PlayerMove : MonoBehaviour
     {
         _characterController = GetComponent<CharacterController>();
         _moveSpeed = BasicSpeed;
-        
+        _animator = GetComponentInChildren<Animator>();
 
         
     }
@@ -71,23 +71,35 @@ public class PlayerMove : MonoBehaviour
         _normalStamina = playerCore.NormalStamina;
         _wallStamina = playerCore.WallStamina;
         _runningStamina = playerCore.RunningStamina;
-        _rollStamina = playerCore.RollStamina;
         _rollPower = playerCore.RollPower;
         JumpPower = playerCore.JumpPower;
+        _yVelocity = GRAVITY;
 
     }
 
     private void Update()
     {
+        
+        
         if (GameManager.Instance.CurrentState == GameManager.GameState.Play )
         {
             BasicCharacterMovement();
-            Stamina();
+            Run();
             Jump();
             Rolling();
-            CheckOnWall();
             SetGravity();
+            
+            
+            Stamina();
+            
+            CheckOnWall();
+            
         }
+
+    }
+    
+    public void ShakeCamera()
+    {
 
     }
 
@@ -155,64 +167,68 @@ public class PlayerMove : MonoBehaviour
             //점프 적용
             if (Input.GetButtonDown("Jump") && _jumpingCount < 1 )
             {
+                _animator.SetTrigger("Jump");
                 _yVelocity = JumpPower;
                 _jumpingCount++;
+            }else
+            {
+                _animator.SetTrigger("Ground");
             }
         }
         
+private void Run(){
+    if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift))
+    {
+        if (!_isWall)
+        {
+            _staminaNumber = _runningStamina;
+            _moveSpeed = DashSpeed;
+            _isRunning = true;
+        }
+    }
 
+    if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift))
+    {
+                    
+        if (!_isWall)
+        {_moveSpeed = BasicSpeed;
+            _isRunning = false;
+        }
+    }
+}
       private  void Stamina()
         {    
+            _stamina += _staminaNumber * Time.deltaTime;//계속해서 스태미나를 채운다
+            _stamina = Mathf.Clamp(_stamina, 0, MaxStamina);
             
-
             
             if (_isGrounded && !_isWall && !_isRunning)
             {
-                _staminaNumber = _normalStamina;
+                _staminaNumber = _normalStamina;//일반적인 상태일 때는 스태미나가 일반적으로 오른다.
             }
             
-            if (_stamina > MaxStamina)
-            {
-                _stamina = MaxStamina;
-            }
-            else if (_stamina >= 0)
-            {
-                if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift))
-                {
-                    if (!_isWall)
-                    {
-                        _staminaNumber = _runningStamina;
-                        _moveSpeed = DashSpeed;
-                        _isRunning = true;
-                    }
-                }
-
-                if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift))
-                {
-                    
-                    if (!_isWall)
-                    {_moveSpeed = BasicSpeed;
-                        _isRunning = false;
-                    }
-                }
-                _stamina += _staminaNumber * Time.deltaTime;
-
-            }
-            else
-            {
-                _moveSpeed = BasicSpeed;
-                _stamina = 0;
-            }
+            //
+            // if (_stamina > MaxStamina)
+            // {
+            //     _stamina = MaxStamina;
+            // }
+            //
+            // if(_stamina<0)
+            // {
+            //     _moveSpeed = BasicSpeed;
+            //     _stamina = 0;
+            // }
             
             
         }
         
       private  void BasicCharacterMovement()
         {
-            float h = Input.GetAxis("Horizontal");
-            float v = Input.GetAxis("Vertical");
+            float h = Input.GetAxisRaw("Horizontal");
+            float v = Input.GetAxisRaw("Vertical");
 
             Vector3 dir = new Vector3(h, 0, v);
+            _animator.SetFloat("MoveAmount", dir.magnitude);
             dir.Normalize();
             
             dir.z += _rollingPower;
@@ -223,18 +239,15 @@ public class PlayerMove : MonoBehaviour
 
 
             if (_characterController.isGrounded) _jumpingCount = 0;
-            //if(_characterController.collisionFlags == CollisionFlags.Below) <- 이것과 같은 말임
 
-
-
-
-            //중력 적용
             
+            //중력 적용
             dir.y = _yVelocity;
             
 
 
             _characterController.Move(dir * Time.deltaTime * _moveSpeed);
+            Debug.Log("Dir : " + dir);
 
         }
     }

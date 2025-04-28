@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class CameraManager : MonoBehaviour
@@ -100,4 +101,6 @@ public class CameraManager : MonoBehaviour
         CameraRotate.enabled = false;
         CameraTPSMove.enabled = false;
     }
+
+    
 }

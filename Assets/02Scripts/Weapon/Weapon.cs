@@ -7,6 +7,8 @@ public abstract class Weapon : MonoBehaviour
 {
 
 
+    public Animator Animator;
+    
     
     [Header("에셋")]
     public ParticleSystem BulletEffect;
@@ -26,7 +28,7 @@ public abstract class Weapon : MonoBehaviour
     
     public bool ShotPossible = true;
     public Coroutine RerollCoroutine;
-
+    public Vector3 ReboundOffset;
 
     private void Start()
     {
@@ -39,12 +41,13 @@ public abstract class Weapon : MonoBehaviour
     public void Attack()
     {
         Debug.Log("Attack");
+        
         if(CurrentAmmo <= 0) Reroll();
         
         if (ShotPossible)
         {
             Debug.Log("Shot!");
-
+            Animator.SetTrigger("Shot");
             StartCoroutine(ShotCooldownCoroutine()); // 쿨타임 타이밍 처리
             Fire();
         }
