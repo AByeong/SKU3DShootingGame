@@ -5,21 +5,35 @@ using UnityEngine.UI;
 
 public class GameState_Wait : GameState
 {
-    [SerializeField] private float WaitTime = 3f;
-    [SerializeField]private float _timer = 0f;
-
+    [SerializeField] private int WaitTime = 3;
+    [SerializeField] private TextMeshProUGUI _timerText;
+    [SerializeField] private Canvas _canvas;
+    
+    private bool _started = false;
+    private int _count = 0;
     public override void Excute()
     {
-        _timer += Time.deltaTime;
-
-        if (_timer >= WaitTime)
+        if (!_started)
         {
-            _timer = 0f;
-            ChangeState(GameManager.GameState.Play);
+            _canvas.gameObject.SetActive(true);
+            _count = WaitTime;
+            _started = true;
+            StartCoroutine(Countdown());
         }
         
     }
 
+    IEnumerator Countdown()
+    {
+        while (_count > 0)
+        {
+            _timerText.text = _count.ToString();
+            yield return new WaitForSeconds(1.0f);
+            _count--;
+        }
+        ChangeState(GameManager.GameState.Play);
+        _canvas.gameObject.SetActive(false);
+    }
     
 
 

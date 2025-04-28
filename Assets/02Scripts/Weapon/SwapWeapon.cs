@@ -23,7 +23,27 @@ public class SwapWeapon : MonoBehaviour
       Debug.Log($"{i}로 스왑!");
       _playerFire.Weapon = Weapons[i];
       
+      DeactivateAllWeapons();
+      ActivateWeapon(i);
+      
    }
+
+   private void DeactivateAllWeapons()
+   {
+
+      foreach (var weapen in Weapons)
+      {
+         weapen.gameObject.SetActive(false);
+      }
+      
+   }
+
+   private void ActivateWeapon(int i)
+   {
+      Weapons[i].gameObject.SetActive(true);
+   }
+   
+   
    
    
 }
