@@ -20,9 +20,10 @@ public class SwapWeapon : MonoBehaviour
    public void swap(int i)
    {
 
-      Debug.Log($"{i}로 스왑!");
-      _playerFire.Weapon = Weapons[i];
       
+      if(i < Weapons.Count)
+      _playerFire.Weapon = Weapons[i];
+      Debug.Log($"{i}로 스왑!");
       DeactivateAllWeapons();
       ActivateWeapon(i);
       
@@ -40,6 +41,7 @@ public class SwapWeapon : MonoBehaviour
 
    private void ActivateWeapon(int i)
    {
+      if(i < Weapons.Count)
       Weapons[i].gameObject.SetActive(true);
    }
    

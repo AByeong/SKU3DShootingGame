@@ -85,10 +85,10 @@ public class PlayerCore : MonoBehaviour, IDamagable
 private Animator _animator;
     private void Update()
     {
-         _animator.SetLayerWeight(0, _currentHealth / MaxHealth);
-         _animator.SetLayerWeight(2, 1 - _currentHealth / MaxHealth);
-         Debug.Log($"0Layer : {_currentHealth / MaxHealth}," +
-                   $"1Layer : {1 - _currentHealth / MaxHealth}");
+         _animator.SetLayerWeight(0, (float)_currentHealth /(float) MaxHealth);
+         _animator.SetLayerWeight(2, 1 -(float) _currentHealth / (float)MaxHealth);
+         //Debug.Log($"0Layer : {_currentHealth / MaxHealth}," +
+         //          $"1Layer : {1 - _currentHealth / MaxHealth}");
         
     }
 }

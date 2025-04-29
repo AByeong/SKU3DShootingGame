@@ -1742,6 +1742,10 @@ MonoBehaviour:
   BombPool: {fileID: 0}
   ThrowPower: 15
   BulletEffect: {fileID: 2004277351}
+  ZoomInSize: 15
+  ZoomOutSize: 60
+  UI_Crosshair: {fileID: 0}
+  UI_SniperZoom: {fileID: 0}
   BombUI: {fileID: 0}
   BulletUI: {fileID: 0}
   _maxBombCount: 3
@@ -1755,6 +1759,7 @@ MonoBehaviour:
   BulletTrailPrefab: {fileID: 0}
   _weaponType: 0
   Weapon: {fileID: 0}
+  weaponCount: 3
 --- !u!1001 &8202411919168739076
 PrefabInstance:
   m_ObjectHideFlags: 0

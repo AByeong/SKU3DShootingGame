@@ -14,6 +14,8 @@ private Animator _animator;
     public EnemyPool Pool;
 
     public UI_Enemy UIEnemy;
+    public ParticleSystem BloodParticles;
+    
     // 이동 방식 선택을 위한 Enum
     public enum MovementMode
     {
@@ -77,7 +79,7 @@ private Animator _animator;
     public float IdleTime = 1f;
 
     // 내부 변수
-    private GameObject _player;
+    [SerializeField] private GameObject _player;
     private CharacterController _characterController;
     private NavMeshAgent _agent;
     private Vector3 _startPosition;
@@ -105,6 +107,8 @@ private Animator _animator;
         // CharacterController와 NavMeshAgent는 모드에 따라 없을 수도 있으므로 경고만 표시
         if (_characterController == null) Debug.LogWarning("CharacterController 컴포넌트 없음", this);
         if (_agent == null) Debug.LogWarning("NavMeshAgent 컴포넌트 없음", this);
+        
+        DamagedTime = 70 * Time.deltaTime;
     }
 
     private void Start()
@@ -202,7 +206,12 @@ _animator = GetComponentInChildren<Animator>();
         }
     }
 
-   
+    public void Bleed(Vector3 position, Vector3 direction)
+    {
+        BloodParticles.transform.position = position;
+        BloodParticles.transform.rotation = Quaternion.LookRotation(direction);
+        BloodParticles.Play();
+    }
  
 
 
@@ -322,6 +331,7 @@ _animator = GetComponentInChildren<Animator>();
         // 플레이어 탐지 시 Trace 상태로 전환
         if (Vector3.Distance(transform.position, _player.transform.position) < FindDistance)
         {
+            _animator.SetTrigger("IdleToMove");
             ChangeState(EnemyState.Trace);
             return;
         }
@@ -365,8 +375,6 @@ _animator = GetComponentInChildren<Animator>();
                 {
                     // 다음 지점으로 인덱스 변경
                     _patrolTargetPointIndex = (_patrolTargetPointIndex + 1) % PatrolPoints.patrolPoints.Count;
-                    // 다음 목적지 설정은 다음 Update에서 SetDestination 호출 시 자동으로 처리됨
-                     // Debug.Log($"Patrol: 다음 목표 {_patrolTargetPointIndex}");
                 }
             }
         }
@@ -395,52 +403,54 @@ _animator = GetComponentInChildren<Animator>();
     {
         float distanceToPlayer = Vector3.Distance(transform.position, _player.transform.position);
 
-        // 공격 가능 거리 진입 또는 복귀 거리 이탈 확인 변수
         bool isInAttackRange = false;
-        bool shouldReturn = (Type == EnemyType.Normal) && (distanceToPlayer >= ReturnDistance); // Follow 타입은 복귀 안 함
+        bool shouldReturn = (Type == EnemyType.Normal) && (distanceToPlayer >= ReturnDistance);
 
-        // --- 이동 및 상태 전환 판정 ---
         if (_moveMode == MovementMode.NavMeshAgent)
         {
             if (_agent != null && _agent.enabled)
             {
-                _agent.stoppingDistance = AttackDistance * 0.8f; // 추적/공격용 멈춤 거리
+                _agent.stoppingDistance = AttackDistance * 0.8f;
                 _agent.isStopped = false;
-                _agent.SetDestination(_player.transform.position); // 항상 플레이어 추적
+                _agent.SetDestination(_player.transform.position);
                 isInAttackRange = (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance);
             }
         }
-        else // CharacterController 모드
+        else
         {
             if (_characterController != null && _characterController.enabled)
             {
                 isInAttackRange = (distanceToPlayer <= AttackDistance);
-                if (!isInAttackRange) // 공격 범위 밖일 때만 이동
+                if (!isInAttackRange)
                 {
                     Vector3 dir = (_player.transform.position - transform.position).normalized;
                     _characterController.Move(dir * MoveSpeed * Time.deltaTime);
-                    if (dir != Vector3.zero) transform.rotation = Quaternion.LookRotation(dir);
                 }
-                
             }
         }
 
-        // 상태 전환
+        // **추가: 항상 플레이어 바라보기**
+        Vector3 dirToPlayer = (_player.transform.position - transform.position).normalized;
+        dirToPlayer.y = 0;
+        if (dirToPlayer != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(dirToPlayer);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
+        }
+
         if (isInAttackRange)
         {
             _animator.SetTrigger("MoveToAttackDelay");
             ChangeState(EnemyState.Attack);
             if (_moveMode == MovementMode.NavMeshAgent && _agent != null && _agent.enabled)
             {
-                _agent.isStopped = true; // 공격 상태 전 이동 멈춤
+                _agent.isStopped = true;
             }
-            return;
         }
         else if (shouldReturn)
         {
             _animator.SetTrigger("MoveToIdle");
             ChangeState(EnemyState.Return);
-            
         }
     }
 

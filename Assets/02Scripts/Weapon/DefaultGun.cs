@@ -13,19 +13,24 @@ public class DefaultGun : Weapon
 
         if (CurrentAmmo > 0)
         {
-            CurrentAmmo--;
-            BulletUI.ChangeBulletCount(CurrentAmmo);
+            
 
             Vector3 targetPoint; // 조준 목표 지점
             Vector3 fireDirection; // 실제 발사 방향
             bool aimingHit = GetAimTargetPoint(out targetPoint); // 플레이어가 조준하는 위치 가져오기
 
+            
+            if (aimingHit){
             // 발사 위치에서 목표 지점까지의 실제 방향 계산
             fireDirection = (targetPoint - FirePosition.position).normalized;
 
             // FirePosition에서 데미지 판정을 위한 실제 레이캐스트 수행
             RaycastHit damageHitInfo;
-            if (Physics.Raycast(FirePosition.position, fireDirection, out damageHitInfo, MaxShotDistance))
+
+            int layerMask = ~(1 << LayerMask.NameToLayer("Player"));
+
+
+            if (Physics.Raycast(FirePosition.position, fireDirection, out damageHitInfo, MaxShotDistance, layerMask))
             {
                 // 실제 피격 지점을 이펙트 및 궤적 종료 지점으로 사용
                 targetPoint = damageHitInfo.point; // 목표 지점을 실제 피격 지점으로 업데이트
@@ -48,12 +53,19 @@ public class DefaultGun : Weapon
                 {
                     PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal);
                 }
+                
+                // --- 총알 궤적 생성 ---
+                SpawnTrail(FirePosition.position, targetPoint);
+                
+                CurrentAmmo--;
+                BulletUI.ChangeBulletCount(CurrentAmmo);
+            }
+            
             }
 
 
 
-            // --- 총알 궤적 생성 ---
-            SpawnTrail(FirePosition.position, targetPoint);
+            
         }
 
     }

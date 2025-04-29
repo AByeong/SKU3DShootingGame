@@ -247,7 +247,6 @@ private void Run(){
 
 
             _characterController.Move(dir * Time.deltaTime * _moveSpeed);
-            Debug.Log("Dir : " + dir);
 
         }
     }

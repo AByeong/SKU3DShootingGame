@@ -40,17 +40,11 @@ public abstract class Weapon : MonoBehaviour
 
     public void Attack()
     {
-        Debug.Log("Attack");
-        
         if(CurrentAmmo <= 0) Reroll();
         
-        if (ShotPossible)
-        {
-            Debug.Log("Shot!");
-            Animator.SetTrigger("Shot");
-            StartCoroutine(ShotCooldownCoroutine()); // 쿨타임 타이밍 처리
-            Fire();
-        }
+        Debug.Log("Shot!");
+        Fire();
+        
     }
     
     public abstract void Fire();
@@ -69,6 +63,7 @@ public abstract class Weapon : MonoBehaviour
         switch (CameraManager.CameraView)
         {
             case CameraManager.CameraViewState.FPS:
+            case CameraManager.CameraViewState.TPS:
 
                 // FPS의 경우, 조준 광선은 화면 중앙(카메라)에서 시작
                 aimRay = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
@@ -84,7 +79,8 @@ public abstract class Weapon : MonoBehaviour
                     hitDetected = false;
                 }
                 break;
-            case CameraManager.CameraViewState.TPS:
+            
+
             case CameraManager.CameraViewState.QuerterView: // 원본 스크립트의 오타 유지
                 // 쿼터뷰의 경우, 조준 광선은 카메라에서 마우스 커서 방향으로 시작
                 aimRay = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -116,13 +112,13 @@ public abstract class Weapon : MonoBehaviour
         return hitDetected;
     }
     
-    IEnumerator ShotCooldownCoroutine()
-    {
-        Debug.Log("Cooldown!");
-        ShotPossible = false; // 발사 불가능 상태로 변경
-        yield return new WaitForSeconds(ShotCoolTime); // 설정된 쿨타임만큼 대기
-        ShotPossible = true; // 발사 가능 상태로 복귀
-        Debug.Log("CooldownEnd!");
-    }
+    // IEnumerator ShotCooldownCoroutine()
+    // {
+    //     Debug.Log("Cooldown!");
+    //     ShotPossible = false; // 발사 불가능 상태로 변경
+    //     yield return new WaitForSeconds(ShotCoolTime); // 설정된 쿨타임만큼 대기
+    //     ShotPossible = true; // 발사 가능 상태로 복귀
+    //     Debug.Log("CooldownEnd!");
+    // }
     
 }

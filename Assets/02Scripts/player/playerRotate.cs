@@ -44,6 +44,8 @@ public class PlayerRotate : MonoBehaviour
 
     }
     
+    
+
     private void HandleFPSRotation()
     {
         float mouseX = Input.GetAxis("Mouse X");
@@ -53,11 +55,14 @@ public class PlayerRotate : MonoBehaviour
         _rotationY -= mouseY * RotationSpeed * Time.deltaTime;
         _rotationY = Mathf.Clamp(_rotationY, -90f, 90f);
 
-        // FPS에서는 주로 카메라를 회전시키므로, 이 스크립트가 부착된 오브젝트(플레이어)의 회전은 Y축만 적용합니다.
-        transform.eulerAngles = new Vector3(0f, _rotationX, 0f);
+        // 카메라 회전
+        MainCamera.transform.localEulerAngles = new Vector3(_rotationY, _rotationX, 0f);
 
-        // 필요하다면 카메라(자식 오브젝트)의 회전은 별도의 CameraRotate 스크립트에서 처리하도록 유지합니다.
+        // 플레이어(오브젝트)는 카메라의 y축(yaw)만 따라가게 한다
+        Vector3 playerRotation = new Vector3(0f, MainCamera.transform.eulerAngles.y, 0f);
+        transform.eulerAngles = playerRotation;
     }
+
 
     private void HandleTPSRotation()
     {

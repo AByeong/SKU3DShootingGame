@@ -19,7 +19,7 @@ public class Knife : Weapon
     public override void Fire()
     {
         Debug.Log("칼!");
-        
+
         Vector3 targetPoint;
         if (GetAimTargetPoint(out targetPoint))
         {
@@ -31,28 +31,35 @@ public class Knife : Weapon
             {
                 Vector3 dirToTarget = (collider.transform.position - center).normalized;
                 float angleToTarget = Vector3.Angle(forward, dirToTarget);
+                float distanceToTarget = Vector3.Distance(center, collider.transform.position);
 
-                if (angleToTarget <= DamageAngle / 2f)
+                bool isClose = distanceToTarget < 1.5f; // 너무 가까운 적 판정 거리 (원하면 숫자 조정 가능)
+
+                if (isClose || angleToTarget <= DamageAngle / 2f)
                 {
                     Debug.Log("공격 범위 안에 있는 적 발견: " + collider.name);
-                    Damage damage = new  Damage();
+
+                    Damage damage = new Damage();
                     damage.Value = DamageValue;
 
                     if (collider.CompareTag("Enemy"))
                     {
                         Enemy enemy = collider.GetComponent<Enemy>();
-                        enemy.TakeDamage(damage);
+                        if (enemy != null)
+                        {
+                            enemy.TakeDamage(damage);
+                            Debug.Log($"{collider.name}에게 {damage.Value}만큼 데미지!");
+                        }
                     }
-
-                    
                 }
             }
 
-            // 기즈모 정보 저장
+            // 기즈모용 정보 저장
             lastFireCenter = center;
             lastFireForward = forward;
         }
     }
+
 
     public override void Reroll()
     {

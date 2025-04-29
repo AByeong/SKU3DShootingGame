@@ -18,12 +18,19 @@ public class PlayerFire : MonoBehaviour
     public float ThrowPower = 15f;
     public ParticleSystem BulletEffect; // 피격 효과
 
+    public float ZoomInSize = 15f;
+    public float ZoomOutSize = 60f;
+    public GameObject[] UI_Crosshair;
+    public GameObject UI_SniperZoom;
+    private bool _zoomMode = false;
+    
     // --- UI 참조 ---
     public UI_Boomb BombUI;
     public UI_Bullet BulletUI;
 
     // --- 폭탄 설정 ---
     [Header("폭탄 설정")] // Inspector에 표시될 헤더
+    private bool _weaponIsBomb = false;
     [SerializeField] private int _maxBombCount = 3; // 최대 폭탄 개수
     [SerializeField] private float _minThrowPower = 3f; // 최소 던지기 파워
     [SerializeField] private float _maxThrowPower = 30f; // 최대 던지기 파워
@@ -44,8 +51,10 @@ public class PlayerFire : MonoBehaviour
     private Coroutine _rerollCoroutine; // 재장전 코루틴 참조
     private float _currentChargePower; // 현재 폭탄 충전 파워 추적
     private Coroutine _reboundCoroutine;
-
-
+    private bool _bombable = true;
+    private int _currentWeaponIndex = 0;
+    
+    
     public enum WeaponType
     {
         Gun,
@@ -82,10 +91,21 @@ public class PlayerFire : MonoBehaviour
     {
         if (GameManager.Instance.CurrentState == GameManager.GameState.Play )
                {
-            HandleShootingInput(); // 발사 입력 처리
-            HandleBombInput(); // 폭탄 입력 처리
-            HandleReloadInput(); // 재장전 입력 처리
-            HandleSwapInput();
+                   //폭탄이 다른 무기들과 구조가 너무 달라 따로 뺌
+                   if (_weaponIsBomb)
+                   {
+                       HandleBombInput();
+                   }           
+                   else             {
+                       HandleShootingInput(); // 발사 입력 처리
+                       
+                   }
+                   
+                   
+                   HandleZoomInput(); // 폭탄 입력 처리
+
+                HandleReloadInput(); // 재장전 입력 처리
+                 HandleSwapInput();
                }
     }
 
@@ -100,67 +120,107 @@ public class PlayerFire : MonoBehaviour
 
             if(!cursorInUI.InUIZone)
             {
-                if (_reboundCoroutine != null)
+                if (_shotPossible)
                 {
-                    StopCoroutine(_reboundCoroutine);
+                    _animator.SetTrigger("Shot");
+                    _shotPossible = false;
                 }
 
-                //_reboundCoroutine = StartCoroutine(Rebound_Coroutine());
-                //FireShot(); // 발사 로직 실행
-                
-                
-                
-                Weapon.Attack();
             }
         }
         
        
     }
 
-    /*IEnumerator Rebound_Coroutine()
+    public void Attack()
     {
-        Vector3 startOffset = Weapon.ReboundOffset;
-        Vector3 targetOffset = Vector3.zero;
-        float duration = 0.5f; // 0.5초 동안 부드럽게 이동
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            CameraFollow.Offset = Vector3.Lerp(startOffset, targetOffset, t);
-            yield return null;
-        }
-
-        // 최종적으로 정확히 Zero로 맞춰줍니다
-        CameraFollow.Offset = Vector3.zero;
+        Debug.Log("Animation Attack!");
+        Weapon.Attack();
     }
-    */
+
+    public void ShotPossible()
+    {
+        _shotPossible = true;
+    }
     
     
-    
+
+    [SerializeField] private int weaponCount = 3; // 현재 무기 개수 (인스펙터에서 설정 가능)
 
     private void HandleSwapInput()
     {
-        
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                SwapWeapon.swap(0);
-                _animator.SetInteger("Weapon",0);
-            }
-            
-            if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                SwapWeapon.swap(1);
-                _animator.SetInteger("Weapon",1);
-            }
-        
+        if (Input.GetAxis("Mouse ScrollWheel") > 0f)
+        {
+            _currentWeaponIndex = (_currentWeaponIndex + 1) % weaponCount;
+            Swap(_currentWeaponIndex);
+        }
+        else if (Input.GetAxis("Mouse ScrollWheel") < 0f)
+        {
+            _currentWeaponIndex = (_currentWeaponIndex - 1 + weaponCount) % weaponCount;
+            Swap(_currentWeaponIndex);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            Swap(0);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            Swap(1);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            Swap(2);
+        }
     }
 
-    private void HandleBombInput()
+    private void ChangeCrossHair(int index)
     {
+        foreach (GameObject crosshair in UI_Crosshair)
+        {
+            crosshair.SetActive(false);
+        }
+        UI_Crosshair[index].SetActive(true);
+    }
+    
+    private void Swap(int index)
+    {
+        _currentWeaponIndex = index;
+        
+        
+        ChangeCrossHair(_currentWeaponIndex);
+
+        switch (_currentWeaponIndex)
+        {
+            case 0:
+                SwapWeapon.swap(0);
+                _animator.SetInteger("Weapon", 0);
+                _weaponIsBomb = false;
+                break;
+
+            case 1:
+                SwapWeapon.swap(1);
+                _animator.SetInteger("Weapon", 1);
+                _weaponIsBomb = false;
+                break;
+
+            case 2:
+                SwapWeapon.swap(2); // 놓치고 있던 부분 추가!
+                
+                _animator.SetInteger("Weapon", 2); // 폭탄도 애니메이션에 포함된다면 필요
+                _weaponIsBomb = true;
+                break;
+
+            default:
+                Debug.LogWarning($"잘못된 무기 인덱스: {index}");
+                break;
+        }
+    }
+
+    
+    private void HandleBombInput(){
         // 폭탄 던지기 충전
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButton(0))
         {
             if (_currentBombCount > 0 && _currentChargePower < _maxThrowPower)
             {
@@ -170,18 +230,33 @@ public class PlayerFire : MonoBehaviour
                 BombUI.ChargeBomb(_currentChargePower/_maxThrowPower);
             }
         }
-
+        
         // 폭탄 던지기 발사 (마우스 버튼 놓음)
-        if (Input.GetMouseButtonUp(1))
+        if (Input.GetMouseButtonUp(0))
         {
             if (_currentBombCount > 0)
             {
-                FireBomb(_currentChargePower); // 충전된 파워 전달
-                _currentChargePower = _minThrowPower; // 충전 상태 초기화
-                //충전 UI 초기화
-                BombUI.ChargeBomb(0);
+                
+                _animator.SetTrigger("Bomb");
+                
+                
             }
-        }
+        }   
+    }
+
+    private void HandleZoomInput()
+    {
+        if (Input.GetMouseButtonDown(1))
+{
+            _zoomMode = !_zoomMode;
+        UI_SniperZoom.SetActive(_zoomMode);
+        UI_Crosshair[_currentWeaponIndex].SetActive(!_zoomMode);
+        if(_zoomMode) Camera.main.fieldOfView = ZoomInSize;
+        else Camera.main.fieldOfView = ZoomOutSize;
+        
+    }
+
+    
     }
 
      private void HandleReloadInput()
@@ -193,26 +268,45 @@ public class PlayerFire : MonoBehaviour
         }
      }
 
+     
     // --- 발사 로직 ---
 
-   
 
-    private void FireBomb(float power)
+
+    public void Bombable()
     {
-        _currentBombCount--;
-        BombUI.ChangeBombCount(_currentBombCount);
+        _bombable = true;
+        _animator.SetBool("BombEnd", true);
+        _animator.SetBool("BombEnd", false);
+    }
+    
+    public void FireBomb()
+    {
+        if (_bombable)
+        {
 
-        Vector3 targetPoint; // 조준 목표 지점
-        Vector3 fireDirection; // 실제 발사 방향
-        bool aimingHit = GetAimTargetPoint(out targetPoint); // 발사와 동일한 방식으로 조준점 가져오기
+            float power = _currentChargePower;
+            _bombable = false;
 
-        // 발사 위치에서 목표 지점까지의 방향 계산
-        fireDirection = (targetPoint - FirePosition.position).normalized;
+            Vector3 targetPoint; // 조준 목표 지점
+            Vector3 fireDirection; // 실제 발사 방향
+            bool aimingHit = GetAimTargetPoint(out targetPoint); // 발사와 동일한 방식으로 조준점 가져오기
 
-        // 더 나은 포물선을 위해 방향을 약간 위로 조정 (선택 사항)
-        // fireDirection = Quaternion.AngleAxis(-10, transform.right) * fireDirection; // 예시: 위쪽으로 10도
+            // 발사 위치에서 목표 지점까지의 방향 계산
+            fireDirection = (targetPoint - FirePosition.position).normalized;
 
-        BombPool.FireBomb(FirePosition, fireDirection, power);
+            // 더 나은 포물선을 위해 방향을 약간 위로 조정 (선택 사항)
+            // fireDirection = Quaternion.AngleAxis(-10, transform.right) * fireDirection; // 예시: 위쪽으로 10도
+
+            BombPool.FireBomb(FirePosition, fireDirection, power);
+
+            _currentChargePower = _minThrowPower; // 충전 상태 초기화
+            //충전 UI 초기화
+            BombUI.ChargeBomb(0);
+
+            _currentBombCount--;
+            BombUI.ChangeBombCount(_currentBombCount);
+        }
     }
 
     // --- 조준 계산 ---
@@ -295,6 +389,7 @@ public class PlayerFire : MonoBehaviour
     {
         yield return new WaitForSeconds(_rerollCoolTime); // 설정된 재장전 시간만큼 대기
         _currentBulletCount = _maxBulletCount; // 탄약 수를 최대로 채움
+        _currentBombCount = _maxBombCount;
         BulletUI.ChangeBulletCount(_currentBulletCount); // 재장전 후 UI 업데이트
         BulletUI.StopReroll(); // UI에 재장전 완료 알림
         _rerollCoroutine = null; // 코루틴 참조 제거

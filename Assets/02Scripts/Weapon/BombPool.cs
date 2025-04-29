@@ -18,6 +18,7 @@ public class BombPool : MonoBehaviour
             bomb.SetActive(false);
         }
     }
+    
 
     public void FireBomb(Transform firePosition, Vector3 direction, float throwPower)
     {
