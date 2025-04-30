@@ -8,12 +8,23 @@ using UnityEngine.Serialization; // NavMeshAgent 사용을 위해 추가
 using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random; // Random 사용을 위해 추가
 
-public class Enemy : MonoBehaviour, IDamagable
+public class EliteEnemy : MonoBehaviour, IDamagable
 {
+    [Header("근접공격 파라미터")]
+    public GameObject AttackEffect;
+    public Transform AttackTransform;
+    public float DamageRange;
+    
+    [Header("죽음 이벤트 파라미터")]
+    public GameObject DeathEffect;
+    public float DeathZoneRange;
+    public float DeathDamage;
+    
+    
 private Animator _animator;
     public EnemyPool Pool;
 
-    public UI_Enemy UIEnemy;
+    public UI_Elite UIEnemy;
     public ParticleSystem BloodParticles;
     
     // 이동 방식 선택을 위한 Enum
@@ -559,7 +570,17 @@ _animator = GetComponentInChildren<Animator>();
     {
         Damage damage = new Damage();
         damage.Value = _damage;
-        _player.GetComponent<PlayerCore>().TakeDamage(damage);
+        
+        Instantiate(AttackEffect, AttackTransform);//공격 이팩트 생성
+
+        if (Vector3.Distance(AttackTransform.position, _player.transform.position) < DamageRange)
+        {
+            Debug.Log($"{Vector3.Distance(AttackTransform.position, _player.transform.position)}의 공격과의 거리");
+            _player.GetComponent<PlayerCore>().TakeDamage(damage);
+        }
+        
+        
+        
     }
 
     // --- 코루틴 ---
@@ -641,6 +662,6 @@ _animator = GetComponentInChildren<Animator>();
         yield return new WaitForSeconds(DeathTime);
 
         Debug.Log($"{gameObject.name} Deactivated");
-        Pool.EnemyDie(this);
+        //Pool.EnemyDie(this);
     }
 }
