@@ -9,7 +9,7 @@ public class PlayerCore : MonoBehaviour, IDamagable
     public UI_PlayerHP UIHP;
     
     [SerializeField] private Image _bloodImage;
-    
+    [SerializeField] private Image _coinImage;
     public float BasicSpeed;
     public float DashSpeed;
     public float MaxStamina;
@@ -22,6 +22,7 @@ public class PlayerCore : MonoBehaviour, IDamagable
     public float JumpPower;
     [SerializeField] private int _currentHealth;
     private Coroutine _bleed;
+    private Coroutine _coin;
     public int CurrentHealth{
         get => _currentHealth;
         set => _currentHealth = Mathf.Clamp(value, 0, MaxHealth);
@@ -31,6 +32,18 @@ public class PlayerCore : MonoBehaviour, IDamagable
     private void Start()
     {
         UIHP.Refresh_HPBar(_currentHealth);
+    }
+
+    public void GetCoin()
+    {
+        if (_coin != null)
+        {
+            StopCoroutine(_coin);
+        }
+        
+        
+        
+        _coin = StartCoroutine(CoinGet());
     }
 
     public void TakeDamage(Damage damage)
@@ -64,6 +77,19 @@ public class PlayerCore : MonoBehaviour, IDamagable
             yield return new WaitForSeconds(0.1f);
             bloodAlpha -= 0.1f;
             _bloodImage.color = new Color(_bloodImage.color.r, _bloodImage.color.g, _bloodImage.color.b, bloodAlpha);
+        }
+    }
+    
+    IEnumerator CoinGet()
+    {
+        float coinAlpha = 1f;
+        _coinImage.color = new Color(_coinImage.color.r, _coinImage.color.g, _coinImage.color.b, coinAlpha);
+
+        while (_coinImage.color.a > 0f)
+        {
+            yield return new WaitForSeconds(0.1f);
+            coinAlpha -= 0.1f;
+            _coinImage.color = new Color(_coinImage.color.r, _coinImage.color.g, _coinImage.color.b, coinAlpha);
         }
     }
     

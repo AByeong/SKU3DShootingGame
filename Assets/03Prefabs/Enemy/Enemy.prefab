@@ -1122,6 +1122,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Pool: {fileID: 0}
   UIEnemy: {fileID: 3210457258142534056}
+  BloodParticles: {fileID: 0}
   Type: 0
   _moveMode: 1
   PatrolPoints: {fileID: 11400000, guid: 44f9ff9880fcd244688c6c9456e31e4c, type: 2}
@@ -1136,6 +1137,12 @@ MonoBehaviour:
   DamagedTime: 0.5
   DeathTime: 2
   IdleTime: 1
+  coinPrefab: {fileID: 4172366906798320836, guid: 0993958ab3fa5c446b9287a62a55f7e1, type: 3}
+  spawnRadius: 1
+  numberOfCoinsToSpawn: 100
+  jumpHeight: 10
+  bezierDuration: 0.5
+  _player: {fileID: 0}
 --- !u!195 &2370291369200601009
 NavMeshAgent:
   m_ObjectHideFlags: 0

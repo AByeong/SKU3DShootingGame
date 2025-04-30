@@ -77,7 +77,13 @@ private Animator _animator;
     public float DeathTime = 2f;
     [Tooltip("대기 상태 지속 시간")]
     public float IdleTime = 1f;
-
+    //코인 관련 변수
+    [Header("코인")]
+    public GameObject coinPrefab;
+    public float spawnRadius = 5f;
+    public int numberOfCoinsToSpawn = 10;
+    public float jumpHeight = 2f;
+    public float bezierDuration = 0.8f;
     // 내부 변수
     [SerializeField] private GameObject _player;
     private CharacterController _characterController;
@@ -90,6 +96,8 @@ private Animator _animator;
     private Vector3 _knockbackDirection;
     private float _knockbackForce;
     private Coroutine _damageCoroutine;
+    
+   
 
 
     private void Awake() // Start 대신 Awake에서 컴포넌트 가져오기 (다른 스크립트의 Start에서 참조 시 안전)
@@ -279,6 +287,7 @@ _animator = GetComponentInChildren<Animator>();
         if (_currentHealth <= 0)
         {
             _animator.SetTrigger("Die");
+            SpawnSomeCoins();
             ChangeState(EnemyState.Die); // 상태 변경 함수 사용
             StartCoroutine(Die_Coroutine());
         }
@@ -605,6 +614,11 @@ _animator = GetComponentInChildren<Animator>();
              // 이동 재개는 Trace()에서 처리됨
         }
         _damageCoroutine = null; // 코루틴 참조 해제
+    }
+    
+    private void SpawnSomeCoins()
+    {
+        Coin.SpawnCoinsInArea(transform.position, spawnRadius, numberOfCoinsToSpawn, coinPrefab, jumpHeight, bezierDuration);
     }
 
     private IEnumerator Die_Coroutine()

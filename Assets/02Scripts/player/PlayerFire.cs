@@ -1,9 +1,12 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 public class PlayerFire : MonoBehaviour
 {
+    public Sprite[] WeaponIconImages;
+    [SerializeField] private Image WeaponIcon;
     private Animator _animator;
     public CameraFollow CameraFollow;
     public PlayerCore PlayerCore;
@@ -182,6 +185,11 @@ public class PlayerFire : MonoBehaviour
         }
         UI_Crosshair[index].SetActive(true);
     }
+
+    private void ChangeIcon(int index)
+    {
+        WeaponIcon.sprite = WeaponIconImages[index];
+    }
     
     private void Swap(int index)
     {
@@ -189,6 +197,7 @@ public class PlayerFire : MonoBehaviour
         
         
         ChangeCrossHair(_currentWeaponIndex);
+        ChangeIcon(_currentWeaponIndex);
 
         switch (_currentWeaponIndex)
         {
