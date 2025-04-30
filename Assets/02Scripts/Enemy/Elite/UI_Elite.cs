@@ -36,10 +36,10 @@ public class UI_Elite : MonoBehaviour
 
     IEnumerator FollowHP()
     {
-        Debug.Log("Follow HP");
+        //Debug.Log("Follow HP");
         while (_targetHp != _hpFollowBar.value)
         {
-            Debug.Log("Minus Elite HP");
+          //  Debug.Log("Minus Elite HP");
             yield return new WaitForSeconds(_followTime / 10f);
             _hpFollowBar.value -= (_hpFollowBar.value - _targetHp)/10f;
         }

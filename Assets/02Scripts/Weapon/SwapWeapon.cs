@@ -23,7 +23,7 @@ public class SwapWeapon : MonoBehaviour
       
       if(i < Weapons.Count)
       _playerFire.Weapon = Weapons[i];
-      Debug.Log($"{i}로 스왑!");
+//      Debug.Log($"{i}로 스왑!");
       DeactivateAllWeapons();
       ActivateWeapon(i);
       

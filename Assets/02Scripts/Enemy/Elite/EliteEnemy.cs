@@ -18,11 +18,11 @@ public class EliteEnemy : MonoBehaviour, IDamagable
     [Header("죽음 이벤트 파라미터")]
     public GameObject DeathEffect;
     public float DeathZoneRange;
-    public float DeathDamage;
-    
+    public int DeathDamage;
+    public Transform DieTransform;
     
 private Animator _animator;
-    public EnemyPool Pool;
+    public EliteEnemyPool Pool;
 
     public UI_Elite UIEnemy;
     public ParticleSystem BloodParticles;
@@ -119,7 +119,7 @@ private Animator _animator;
         _startPosition = transform.position;
         _currentHealth = MaxHealth; // 시작 시 체력 초기화
 
-        Pool = FindAnyObjectByType <EnemyPool>();
+        Pool = FindAnyObjectByType <EliteEnemyPool>();
         
         // 필수 컴포넌트 및 오브젝트 확인
         if (_player == null) { Debug.LogError("플레이어를 찾을 수 없습니다! 'Player' 태그 확인", this); enabled = false; return; }
@@ -282,7 +282,7 @@ _animator = GetComponentInChildren<Animator>();
         _currentHealth -= damage.Value;
         _knockbackDirection = -damage.HitDirection.normalized;
         _knockbackForce = damage.KnockBackPower;
-        Debug.Log($"{gameObject.name} 피격! 현재 체력: {_currentHealth}, 받은 데미지: {damage.Value}, 넉백힘: {_knockbackForce}");
+        //Debug.Log($"{gameObject.name} 피격! 현재 체력: {_currentHealth}, 받은 데미지: {damage.Value}, 넉백힘: {_knockbackForce}");
 
 
         // 기존 피격 코루틴 중지
@@ -298,9 +298,10 @@ _animator = GetComponentInChildren<Animator>();
         if (_currentHealth <= 0)
         {
             _animator.SetTrigger("Die");
-            SpawnSomeCoins();
+
             ChangeState(EnemyState.Die); // 상태 변경 함수 사용
-            StartCoroutine(Die_Coroutine());
+            Die();
+            //StartCoroutine(Die_Coroutine());
         }
         else
         {
@@ -642,7 +643,8 @@ _animator = GetComponentInChildren<Animator>();
         Coin.SpawnCoinsInArea(transform.position, spawnRadius, numberOfCoinsToSpawn, coinPrefab, jumpHeight, bezierDuration);
     }
 
-    private IEnumerator Die_Coroutine()
+
+    private void DieDelay()
     {
         Debug.Log($"{gameObject.name} Die");
 
@@ -657,11 +659,31 @@ _animator = GetComponentInChildren<Animator>();
         {
             _characterController.enabled = false;
         }
-      
+    }
+    public void DieEvent()
+    {
+        StartCoroutine(Die());
+    }
 
-        yield return new WaitForSeconds(DeathTime);
-
+    IEnumerator Die()
+    {SpawnSomeCoins();
+        
+        Instantiate(DeathEffect, DieTransform.position, DieTransform.rotation, null);
+        Debug.Log($"{Vector3.Distance(DieTransform.position, _player.transform.position)}만큼 폭발로 부터 멂");
+        if (Vector3.Distance(DieTransform.position, _player.transform.position) < DeathZoneRange)
+        {
+            
+            
+            Damage damage = new Damage();
+            damage.Value = DeathDamage;
+            
+            _player.GetComponent<PlayerCore>().TakeDamage(damage);
+        }
+       
+        yield return new WaitForSeconds(1f);
+        
+         
         Debug.Log($"{gameObject.name} Deactivated");
-        //Pool.EnemyDie(this);
+        Pool.EnemyDie(this);
     }
 }
