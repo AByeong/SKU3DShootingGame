@@ -34,7 +34,8 @@ public class Coin : MonoBehaviour
     private bool _isAttracting = false;
     private bool _hasLanded = false;
 
-    private Vector3 _rotationAxis;
+    // 제거: 초기 회전은 Start 또는 SetInitialMovement에서 설정
+    // private Vector3 _rotationAxis = Vector3.up;
     private float _rotationSpeed;
 
     private void Awake()
@@ -72,46 +73,46 @@ public class Coin : MonoBehaviour
 
     private void Start()
     {
+        // --- 시작 시 코인 세우기 ---
+        // 프리팹이 이미 서있는 상태라면 이 줄은 주석 처리하거나 삭제하세요.
+        transform.Rotate(90f, 0f, 0f, Space.Self); // 로컬 X축 기준 90도 회전 (필요에 따라 축 변경)
+        // ------------------------
+
         // If SetInitialMovement was not called before Start (e.g., placed manually in scene)
         // Use the old random logic as a fallback.
         if (!_isBezierMoving)
         {
-            _startPos = transform.position;
-
-            _rotationAxis = new Vector3(
-                Random.Range(-1f, 1f),
-                Random.Range(0.5f, 1f), // Slightly favor upward axis for rotation
-                Random.Range(-1f, 1f)
-            ).normalized;
+            _startPos = transform.position; // 회전 후의 시작 위치 사용
             _rotationSpeed = Random.Range(180f, 720f);
-
 
             Vector3 randomOffsetXZ = new Vector3(
                 Random.Range(-SpreadRadius, SpreadRadius),
                 0f, // Only horizontal spread for end position offset
                 Random.Range(-SpreadRadius, SpreadRadius)
             );
-            _endPos = new Vector3(_startPos.x + randomOffsetXZ.x, 0f, _startPos.z + randomOffsetXZ.z); // Assume ground at Y=0
+            // 끝 위치 계산 시 Y=0 가정 대신, 시작 높이를 유지하도록 변경하거나 지형 감지 필요
+            // 여기서는 간단히 시작 높이를 유지하도록 수정 (더 정확하려면 Raycast 필요)
+            _endPos = new Vector3(_startPos.x + randomOffsetXZ.x, _startPos.y, _startPos.z + randomOffsetXZ.z);
 
             // Control point is mid-way horizontally, with added jump height
             _controlPos = _startPos + randomOffsetXZ * 0.5f + Vector3.up * JumpHeight;
 
-
             _isBezierMoving = true; // Start the movement if initialized here
         }
-        // If SetInitialMovement *was* called, _isBezierMoving is already true and positions are set.
-        // Rotation initialization is now also handled in SetInitialMovement.
-
     }
 
     // New method for the Enemy to set up the coin's initial movement
     public void SetInitialMovement(Vector3 startPos, Vector3 landingOffsetHorizontal, float baseJumpHeight)
     {
-        _startPos = startPos;
+        transform.position = startPos; // 위치 먼저 설정
 
-        // Calculate the landing position. Assume ground is at Y=0 for simplicity.
-        // The horizontal offset is provided by the enemy.
-        _endPos = new Vector3(_startPos.x + landingOffsetHorizontal.x, 0f, _startPos.z + landingOffsetHorizontal.z);
+        
+
+        _startPos = transform.position; // 회전이 적용된 후의 위치
+
+        // Calculate the landing position. Assume ground is at Y=0 for simplicity, or maintain start Y
+        // 여기서는 시작 높이를 유지하도록 수정
+        _endPos = new Vector3(_startPos.x + landingOffsetHorizontal.x, _startPos.y, _startPos.z + landingOffsetHorizontal.z);
 
         // Calculate the control point for the Bezier curve with random height variation
         float randomHeightOffset = Random.Range(-0.3f, 0.3f); // 작은 랜덤 높이 오프셋
@@ -123,12 +124,7 @@ public class Coin : MonoBehaviour
         _isBezierMoving = true;
         _hasLanded = false; // Ensure hasLanded is false until bezier movement finishes
 
-        // Initialize rotation with random variations
-        _rotationAxis = new Vector3(
-            Random.Range(-1f, 1f),
-            Random.Range(0.5f, 1f),
-            Random.Range(-1f, 1f)
-        ).normalized;
+        // Initialize rotation
         _rotationSpeed = Random.Range(180f, 720f); // 기본 속도 범위 유지
 
         // Ensure attraction is off initially
@@ -159,38 +155,32 @@ public class Coin : MonoBehaviour
 
                 // Snap to the final position to avoid slight offset
                 transform.position = _endPos;
-
-                // Stop rotating or transition to flat rotation upon landing
-                transform.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f); // Keep Y rotation, flatten X/Z
             }
 
-            if (_isBezierMoving) // Only rotate while moving on the bezier curve
-            {
-                transform.Rotate(_rotationAxis, _rotationSpeed * Time.deltaTime);
-                transform.position = CalculateQuadraticBezierPoint(_bezierTime, _startPos, _controlPos, _endPos);
-            }
+            // 베지어 이동 중 위치 업데이트
+            transform.position = CalculateQuadraticBezierPoint(_bezierTime, _startPos, _controlPos, _endPos);
 
-            // Do not check for attraction or flatten rotation while still moving on bezier
-            return;
+            // 베지어 이동 중에도 월드 Y축 기준으로 회전 (이 부분은 문제 없음)
+            transform.Rotate(Vector3.up, _rotationSpeed * Time.deltaTime, Space.World);
+
+            return; // 베지어 이동 중에는 아래 로직 실행 안 함
         }
 
         // After landing
-        if (_hasLanded && !_isAttracting)
+        if (_hasLanded)
         {
+            // 착지 후에도 월드 Y축을 기준으로 회전 (이 부분은 문제 없음)
+            transform.Rotate(Vector3.up, _rotationSpeed * Time.unscaledDeltaTime, Space.World);
+
             // Check for attraction range *only if player exists*
-            if (CoinInTransfrom != null)
+            if (!_isAttracting && CoinInTransfrom != null)
             {
                 float distance = Vector3.Distance(transform.position, CoinInTransfrom.position);
                 if (distance < AttractRange)
                 {
                     _isAttracting = true;
-                    // Stop previous rotation completely or smoothly transition out
                 }
             }
-
-            // Keep the coin upright after landing if not attracting
-            Quaternion flatRotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
-            transform.rotation = Quaternion.Lerp(transform.rotation, flatRotation, Time.deltaTime * 5f);
         }
 
         // Attraction movement
@@ -201,12 +191,11 @@ public class Coin : MonoBehaviour
             {
                 Vector3 dir = (CoinInTransfrom.position - transform.position).normalized;
                 transform.position += dir * AttractSpeed * Time.deltaTime;
-                // Optional: Make coin spin while attracting
-                transform.Rotate(Vector3.up, 360 * Time.deltaTime); // Spin around Y axis
+                // 끌려갈 때도 월드 Y축 기준으로 계속 회전 (이 부분은 문제 없음)
+                transform.Rotate(Vector3.up, _rotationSpeed * Time.unscaledDeltaTime, Space.World);
             }
             else
             {
-                // If player disappears while attracting, stop attracting
                 _isAttracting = false;
             }
         }
@@ -214,19 +203,17 @@ public class Coin : MonoBehaviour
 
     private Vector3 CalculateQuadraticBezierPoint(float t, Vector3 p0, Vector3 p1, Vector3 p2)
     {
-        // p(t) = (1-t)^2 * P0 + 2*(1-t)*t*P1 + t^2 * P2
         float u = 1 - t;
         float tt = t * t;
         float uu = u * u;
-        Vector3 p = uu * p0; // (1-t)^2 * P0
-        p += 2 * u * t * p1; // 2*(1-t)*t*P1
-        p += tt * p2;       // t^2 * P2
+        Vector3 p = uu * p0;
+        p += 2 * u * t * p1;
+        p += tt * p2;
         return p;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // 기존의 OnTrggerEnter는 그대로 유지 (혹시 모를 충돌 기반 획득)
         if (CoinInTransfrom != null && other.gameObject == CoinInTransfrom.gameObject)
         {
             CoinInPlayer();
@@ -235,65 +222,55 @@ public class Coin : MonoBehaviour
 
     private void CoinInPlayer()
     {
-        // Add coin to player's inventory/score *only if PlayerCore exists*
         if (PlayerCore != null)
         {
             Debug.Log("코인 획득");
             PlayerCore.GetCoin();
-            // PlayerCore.AddCoin(1); // Assuming PlayerCore has an AddCoin method
         }
         else
         {
             Debug.LogWarning("Coin collected but PlayerCore reference is missing!", this);
         }
-
-        // Destroy or pool the coin
-        Destroy(gameObject); // Or return to pool
+        Destroy(gameObject);
     }
 
-    // Optional: Draw gizmo for attraction range
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, AttractRange);
-
-        // 추가: 자동 획득 거리 기즈모
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, CollectionDistance);
     }
 
-    /// <summary>
-    /// 지정된 위치와 반경 내에 원하는 개수의 코인을 골고루 뿌립니다.
-    /// </summary>
-    /// <param name="spawnPosition">코인을 뿌릴 중심 위치입니다.</param>
-    /// <param name="spawnRadius">코인을 뿌릴 반경입니다.</param>
-    /// <param name="coinCount">생성할 코인의 개수입니다.</param>
+    // SpawnCoinsInArea 함수는 수정할 필요 없음 (Instantiate 시 프리팹의 기본 회전을 사용하거나,
+    // 생성된 코인의 Start/SetInitialMovement에서 회전이 적용됨)
     public static void SpawnCoinsInArea(Vector3 spawnPosition, float spawnRadius, int coinCount, GameObject coinPrefab, float baseJumpHeight = 1.5f, float bezierDuration = 0.5f)
     {
         for (int i = 0; i < coinCount; i++)
         {
-            // 원형 범위 내의 랜덤한 위치 계산 (균등 분포를 위해)
+            // 코인 생성 위치 계산 (Y값은 spawnPosition 그대로 사용)
             Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
-            Vector3 randomPosition = new Vector3(spawnPosition.x + randomCircle.x, spawnPosition.y, spawnPosition.z + randomCircle.y);
+            Vector3 randomSpawnPos = new Vector3(spawnPosition.x + randomCircle.x, spawnPosition.y, spawnPosition.z + randomCircle.y);
 
-            // 코인 프리팹이 설정되었는지 확인
+            // 착지 위치 계산을 위한 수평 오프셋 (랜덤하게 생성)
+            // 여기서는 간단히 스폰 위치 주변 랜덤한 곳으로 설정
+            Vector2 landingOffsetCircle = Random.insideUnitCircle * spawnRadius; // 착지 위치를 위한 또 다른 랜덤 값
+            Vector3 landingOffsetHorizontal = new Vector3(landingOffsetCircle.x, 0f, landingOffsetCircle.y);
+
+
             if (coinPrefab != null)
             {
-                // 코인 오브젝트 생성
-                GameObject spawnedCoin = Instantiate(coinPrefab, randomPosition, Quaternion.identity);
-
-                // Coin 스크립트가 있는지 확인하고 초기 움직임 설정
+                // Quaternion.identity는 프리팹의 기본 회전을 사용합니다.
+                GameObject spawnedCoin = Instantiate(coinPrefab, randomSpawnPos, Quaternion.identity);
                 Coin coinComponent = spawnedCoin.GetComponent<Coin>();
                 if (coinComponent != null)
                 {
-                    // 코인이 생성될 시작 위치는 생성된 랜덤 위치
-                    Vector3 startPos = spawnedCoin.transform.position;
-                    // 착지할 최종 위치는 Y=0 (지면)
-                    Vector3 endPosHorizontalOffset = new Vector3(randomCircle.x, 0f, randomCircle.y);
-
+                    // Bezier 및 점프 높이 설정
                     coinComponent.BezierDuration = bezierDuration;
-                    coinComponent.JumpHeight = baseJumpHeight; // SpawnCoinsInArea에서도 baseJumpHeight 사용
-                    coinComponent.SetInitialMovement(startPos, endPosHorizontalOffset, baseJumpHeight);
+                    // JumpHeight는 SetInitialMovement에서 baseJumpHeight를 사용하므로 여기서는 직접 설정 안 함
+
+                    // SetInitialMovement 호출하여 움직임 시작 (내부에서 초기 회전도 처리)
+                    coinComponent.SetInitialMovement(randomSpawnPos, landingOffsetHorizontal, baseJumpHeight);
                 }
                 else
                 {
@@ -303,7 +280,7 @@ public class Coin : MonoBehaviour
             else
             {
                 Debug.LogError("Coin 프리팹이 설정되지 않았습니다!");
-                return;
+                return; // 프리팹 없으면 종료
             }
         }
     }
