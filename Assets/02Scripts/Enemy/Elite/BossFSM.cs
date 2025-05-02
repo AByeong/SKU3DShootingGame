@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.AI;
@@ -21,8 +22,13 @@ public class BossFSM : MonoBehaviour, IDamagable
         Die
     }
 
+    public UI_Boss UI_BOSS;
+    
+
     [Header("현재 상태")]
     public BossState CurrentState = BossState.Deactive;
+    public float MaxHealth = 100f;
+    public int Defense = 10;
 
     [Header("활성화 파라미터")]
     [SerializeField] private float _activateRange = 10f;
@@ -42,7 +48,13 @@ public class BossFSM : MonoBehaviour, IDamagable
     public Vector3 RushTransform; // 돌진 목표 위치 (추적 시작 시점의 플레이어 위치)
     [SerializeField] private int _rushDamage = 20;
     
-
+[Header("피격시 데미지")]
+[SerializeField]private List<Material> _materials;
+[SerializeField]private List<Color> _originalColors;
+private Coroutine _colorChangeCoroutine;
+private float _colorChangeTime;
+private float _timer;
+private bool _isChangingColor = false;
     
 
     [Header("보스 정보")]
@@ -53,6 +65,9 @@ public class BossFSM : MonoBehaviour, IDamagable
     [SerializeField] private float _attackDelayTime = 3f;
     [SerializeField] private float _attackRange = 10f;
 
+    [Header("죽음")] 
+    [SerializeField] private float _disappearTime = 5f;
+    
     [Header("코인")]
     public GameObject coinPrefab;
     public float spawnRadius = 5f;
@@ -62,9 +77,10 @@ public class BossFSM : MonoBehaviour, IDamagable
 
     private NavMeshAgent _agent;
     private GameObject _player;
-    private int _currentHealth;
+    [SerializeField]private int _currentHealth;
     private Animator _animator;
     private float _attackDelayTimer = 0f;
+    private Collider _collider;
 
     public enum Trigger
     {
@@ -92,8 +108,15 @@ public class BossFSM : MonoBehaviour, IDamagable
         _agent = GetComponent<NavMeshAgent>();
         _player = GameObject.FindGameObjectWithTag("Player");
         _animator = GetComponent<Animator>();
+        _collider = GetComponent<Collider>();
+        FindAllMaterials(); // 머티리얼 배열 업데이트 (동적으로 렌더러가 추가/제거될 경우 대비)
     }
-
+    private void Start()
+    {
+        _currentHealth = _maxHealth;
+        UI_BOSS.Refresh_HPBar(_currentHealth);
+    }
+   
     private void Update()
     {
         switch (CurrentState)
@@ -157,13 +180,19 @@ public class BossFSM : MonoBehaviour, IDamagable
                     ChangeState(BossState.Rush);
                 }
                 break;
+            case BossState.Die:
+                if (_agent.enabled == true)
+                {
+                    _agent.isStopped = true;
+                    _collider.enabled = false;
+                    _agent.enabled = false;
+                }
+
+                break;
         }
     }
 
-    private void Start()
-    {
-        _currentHealth = _maxHealth;
-    }
+    
 
     public void ChangeState(BossState newState)
     {
@@ -204,6 +233,10 @@ public class BossFSM : MonoBehaviour, IDamagable
             case BossState.Attack:
                 _animator.SetTrigger(Triggers[(int)Trigger.Attack]);
                 break;
+            
+            case BossState.Die:
+                _animator.SetTrigger("Die");
+                break;
         }
     }
 
@@ -217,7 +250,8 @@ public class BossFSM : MonoBehaviour, IDamagable
         //_animator.SetTrigger(Triggers[(int)Trigger.Spell]);
         for (int i = 0; i < _summonCount; i++)
         {
-            Instantiate(_ghost, _ghostTransform);
+            GameObject ghost = Instantiate(_ghost, _ghostTransform);
+            ghost.transform.SetParent(null);
         }
     }
 
@@ -268,65 +302,168 @@ public class BossFSM : MonoBehaviour, IDamagable
             _player.GetComponent<PlayerCore>().TakeDamage(damage);
         }
         
-        ChangeState(BossState.Trace); // 공격 후 공격 대기 상태로 전환
+       // ChangeState(BossState.Trace); // 공격 후 공격 대기 상태로 전환
     }
 
     public void TakeDamage(Damage damage)//데미지를 입는다
     {
+        if (CurrentState == BossState.Die || CurrentState == BossState.Summon || CurrentState == BossState.Deactive || CurrentState == BossState.Active) return;
+        
         Debug.Log($"BOSS : Damaged! Received {damage.Value} damage.");
-        _currentHealth -= damage.Value;
+        _currentHealth -= damage.Value/Defense;
+
+
+        StartColorChange(0.1f);
+        
+        
+        UI_BOSS.Refresh_HPBar(_currentHealth);
         if (_currentHealth <= 0)
         {
             ChangeState(BossState.Die);
         }
-        else
-        {
-            ChangeState(BossState.Damaged); // 피격 상태로 전환 (애니메이션 등을 위해)
-            // 필요하다면 피격 애니메이션 재생 후 이전 상태로 복귀하는 로직 추가
-        }
+        
     }
 
-    public void Die()//죽음
+    public void Die()
     {
         Debug.Log("BOSS : Died!");
-        _animator.SetTrigger("Die"); // 죽음 애니메이션 재생 (애니메이션 컨트롤러에 "Die" 트리거 필요)
-        StartCoroutine(DieEvent());
-        // 죽음 후 추가적인 처리 (코인 생성 등)는 DieEvent 코루틴에서 처리
+        _animator.SetTrigger("Die");
+        
+        
     }
+    
 
+    
     IEnumerator DieEvent()//죽었을 때 일어나야하는 이벤트
     {
-        // 코인 생성 로직
-        for (int i = 0; i < numberOfCoinsToSpawn; i++)
+        
+            SpawnSomeCoins();
+        
+
+        // 보스 사라지는 코루틴 시작 (코인 생성과 동시에 시작)
+        StartCoroutine(BossDisappear());
+
+        yield return null; // 코인 생성과 보스 사라짐 코루틴이 시작된 후 즉시 종료
+    }
+
+    private void SpawnSomeCoins()
+    {
+        Coin.SpawnCoinsInArea(new Vector3(transform.position.x,0.1f,transform.position.z), spawnRadius, numberOfCoinsToSpawn, coinPrefab, jumpHeight, bezierDuration);
+    }
+    
+    // 보스를 사라지게 하는 코루틴 (예시)
+    IEnumerator BossDisappear()
+    {
+        // 사라지기 전 대기 시간 (선택 사항)
+        yield return new WaitForSeconds(_disappearTime);
+
+        // Fade Out 애니메이션 또는 다른 사라지는 효과 처리 (예시: 알파 값 조절)
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        foreach (Renderer renderer in renderers)
         {
-            Vector3 randomOffset = UnityEngine.Random.insideUnitSphere * spawnRadius;
-            randomOffset.y = Mathf.Abs(randomOffset.y); // 코인이 땅 밑으로 파고들지 않도록 y값은 양수로
-
-            Vector3 spawnPosition = transform.position + randomOffset;
-            GameObject coin = Instantiate(coinPrefab, spawnPosition, Quaternion.identity);
-
-            // 베지어 곡선 이동 로직 (선택 사항)
-            if (jumpHeight > 0 && bezierDuration > 0)
+            // MaterialPropertyBlock을 사용하여 머티리얼의 알파 값을 조절하는 방식 권장
+            // 여기서는 단순화를 위해 머티리얼 직접 접근 (주의: 공유 머티리얼 수정은 모든 인스턴스에 영향)
+            if (renderer.material.HasProperty("_Color"))
             {
-                StartCoroutine(MoveCoinWithBezier(coin.transform, spawnPosition, spawnPosition + Vector3.up * jumpHeight, transform.position + Vector3.up * (jumpHeight / 2f) + UnityEngine.Random.insideUnitSphere * (spawnRadius / 2f), bezierDuration));
+                Color color = renderer.material.color;
+                float alpha = 1f;
+                while (alpha > 0f)
+                {
+                    alpha -= Time.deltaTime * 0.5f; // 사라지는 속도 조절
+                    color.a = alpha;
+                    renderer.material.color = color;
+                    yield return null;
+                }
             }
         }
-        yield return null;
-        Destroy(gameObject); // 보스 오브젝트 제거
+
+        // 모든 Fade Out 효과가 끝난 후 오브젝트 제거
+        Destroy(gameObject);
+    }
+    
+    
+
+
+    // 자신과 자식들의 모든 렌더러에서 모든 머티리얼을 찾아 리스트에 저장
+    private void FindAllMaterials()
+    {
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        _materials.Clear();
+        _originalColors.Clear();
+
+        foreach (Renderer renderer in renderers)
+        {
+            if (renderer.materials != null && renderer.materials.Length > 0)
+            {
+                foreach (Material material in renderer.materials)
+                {
+                    _materials.Add(material);
+                    _originalColors.Add(material.color);
+                }
+            }
+        }
     }
 
-    IEnumerator MoveCoinWithBezier(Transform target, Vector3 p0, Vector3 p1, Vector3 p2, float duration)
+    public void StartColorChange(float duration)
     {
-        float time = 0f;
-        while (time < duration)
+        if (_isChangingColor) return;
+
+        FindAllMaterials(); // 머티리얼 리스트 업데이트
+
+        if (_materials.Count == 0)
         {
-            time += Time.deltaTime;
-            float t = time / duration;
-            Vector3 point1 = Vector3.Lerp(p0, p2, t);
-            Vector3 point2 = Vector3.Lerp(p2, p1, t);
-            target.position = Vector3.Lerp(point1, point2, t);
+            Debug.LogWarning($"{gameObject.name} 또는 자식 오브젝트에 렌더러가 없습니다.", this);
+            return;
+        }
+
+        _colorChangeTime = duration;
+        _timer = 0f;
+        _isChangingColor = true;
+
+        // 모든 머티리얼의 색상을 빨간색으로 변경하고 코루틴 시작
+        for (int i = 0; i < _materials.Count; i++)
+        {
+            if (_materials[i] != null)
+            {
+                _materials[i].color = Color.red;
+            }
+        }
+
+        StartCoroutine(ChangeColorCoroutine());
+    }
+
+    private System.Collections.IEnumerator ChangeColorCoroutine()
+    {
+        while (_timer < _colorChangeTime)
+        {
+            _timer += Time.deltaTime;
+            float normalizedTime = Mathf.Clamp01(_timer / _colorChangeTime);
+
+            // 빨간색에서 흰색으로 보간
+            Color currentColor = Color.Lerp(Color.red, Color.white, normalizedTime);
+
+            // 모든 머티리얼의 색상 업데이트
+            for (int i = 0; i < _materials.Count; i++)
+            {
+                if (_materials[i] != null)
+                {
+                    _materials[i].color = currentColor;
+                }
+            }
+
             yield return null;
         }
-        target.position = p1; // 최종 위치 보정
+
+        // 색상 변경 완료 후 원래 색상으로 복원 (선택 사항)
+        // for (int i = 0; i < _materials.Count; i++)
+        // {
+        //     if (_materials[i] != null && i < _originalColors.Count)
+        //     {
+        //         _materials[i].color = _originalColors[i];
+        //     }
+        // }
+
+        _isChangingColor = false;
     }
+    
 }

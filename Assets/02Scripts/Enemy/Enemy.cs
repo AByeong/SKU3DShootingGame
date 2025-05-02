@@ -91,6 +91,7 @@ private Animator _animator;
     private Vector3 _startPosition;
     private float _attackTimer = 0f;
     private float _idleTimer = 0f;
+    private Collider _collider;
 
     // 넉백 관련 변수
     private Vector3 _knockbackDirection;
@@ -107,7 +108,7 @@ private Animator _animator;
         _agent = GetComponent<NavMeshAgent>();
         _startPosition = transform.position;
         _currentHealth = MaxHealth; // 시작 시 체력 초기화
-
+        _collider = GetComponent<Collider>();
         Pool = FindAnyObjectByType <EnemyPool>();
         
         // 필수 컴포넌트 및 오브젝트 확인
@@ -259,6 +260,9 @@ _animator = GetComponentInChildren<Animator>();
                 
                 break;
             case EnemyState.Die:
+                _agent.isStopped = true;
+                _agent.enabled = false;
+                _collider.enabled = false;
                 break;
         }
     }

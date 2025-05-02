@@ -51,6 +51,31 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!1101 &-6584339695659419469
+AnimatorStateTransition:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_Conditions:
+  - m_ConditionMode: 1
+    m_ConditionEvent: Die
+    m_EventTreshold: 0
+  m_DstStateMachine: {fileID: 0}
+  m_DstState: {fileID: 642023129163753135}
+  m_Solo: 0
+  m_Mute: 0
+  m_IsExit: 0
+  serializedVersion: 3
+  m_TransitionDuration: 0.25
+  m_TransitionOffset: 0
+  m_ExitTime: 0.75
+  m_HasExitTime: 0
+  m_HasFixedDuration: 1
+  m_InterruptionSource: 0
+  m_OrderedInterruption: 1
+  m_CanTransitionToSelf: 1
 --- !u!1101 &-6309354792859874177
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -124,16 +149,19 @@ AnimatorStateMachine:
     m_Position: {x: -490, y: -30, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 6449151396914793135}
-    m_Position: {x: 220, y: -230, z: 0}
+    m_Position: {x: 110, y: -330, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -2828105591595671787}
-    m_Position: {x: -210, y: -260, z: 0}
+    m_Position: {x: -370, y: -260, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -8475110592254925362}
     m_Position: {x: -380, y: -170, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 97327368412336252}
-    m_Position: {x: 20, y: -290, z: 0}
+    m_Position: {x: -150, y: -320, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 642023129163753135}
+    m_Position: {x: 235.35944, y: -151.86865, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: 7499643416733244543}
@@ -141,6 +169,7 @@ AnimatorStateMachine:
   - {fileID: -8171241368757531809}
   - {fileID: -6305087037871447628}
   - {fileID: 6666855920773124091}
+  - {fileID: -6584339695659419469}
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
@@ -381,6 +410,12 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
+  - m_Name: Die
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -446,6 +481,32 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!1102 &642023129163753135
+AnimatorState:
+  serializedVersion: 6
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Die
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 7400000, guid: 29b6372ad77aeb645bc9ce92051934d1, type: 2}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
 --- !u!1101 &695377650138940957
 AnimatorStateTransition:
   m_ObjectHideFlags: 1

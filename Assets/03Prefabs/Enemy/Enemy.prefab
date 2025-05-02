@@ -1139,7 +1139,7 @@ MonoBehaviour:
   IdleTime: 1
   coinPrefab: {fileID: 4172366906798320836, guid: 0993958ab3fa5c446b9287a62a55f7e1, type: 3}
   spawnRadius: 1
-  numberOfCoinsToSpawn: 100
+  numberOfCoinsToSpawn: 10
   jumpHeight: 10
   bezierDuration: 0.5
   _player: {fileID: 0}
