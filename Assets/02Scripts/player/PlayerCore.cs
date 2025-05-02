@@ -32,6 +32,7 @@ public class PlayerCore : MonoBehaviour, IDamagable
 
     private void Start()
     {
+        DamagedEffect = GetComponent<DamagedEffect>();
         UIHP.Refresh_HPBar(_currentHealth);
         DamagedEffect.ColorChangeTime = 0f;
     }

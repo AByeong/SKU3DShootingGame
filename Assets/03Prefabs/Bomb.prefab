@@ -149,6 +149,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4be50d77eee5dc49a8840d6fd00d6a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraManager: {fileID: 0}
   ExplosionEffectPrefab: {fileID: 100004, guid: b46890100828db6429ff69c322b45893, type: 3}
+  DecalProjectorPrefab: {fileID: 5133998788976646614, guid: 49900a563d8b17f4cb7161e18a47a20d, type: 3}
+  DecalLifetime: 10
   ExplosionDamage: 1
   KnockbackPower: 10

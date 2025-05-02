@@ -39,7 +39,8 @@ public class DefaultGun : Weapon
                     Value = 10,
                     From = this.gameObject,
                     KnockBackPower = 1f,
-                    HitDirection = -fireDirection // 적 *방향으로*의 벡터 (피격 방향)
+                    HitDirection = -fireDirection, // 적 *방향으로*의 벡터 (피격 방향)
+                    HitTransform = targetPoint
                 };
 
                 if (damageHitInfo.collider.TryGetComponent<IDamagable>(out IDamagable damagable))
@@ -51,16 +52,12 @@ public class DefaultGun : Weapon
 
 
                 // --- 피격 이펙트 재생 ---
-                if (BulletEffect.Length != 0)
+                if (BulletEffect != null)
                 {
 
-                    if (damageHitInfo.collider.CompareTag("Enemy"))
+                    if (!damageHitInfo.collider.CompareTag("Enemy"))
                     {
-                        PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal,1);
-                    }
-                    else
-                    {
-                        PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal,0);
+                        PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal);
                     }
                 }
                 
@@ -83,11 +80,11 @@ public class DefaultGun : Weapon
     
 
     //***************피격 이팩트 재생**********
-    private void PlayImpactEffect(Vector3 position, Vector3 normal, int type)
+    private void PlayImpactEffect(Vector3 position, Vector3 normal)
     {
-            BulletEffect[type].transform.position = position; // 이펙트 위치 설정
-            BulletEffect[type].transform.forward = normal; // 표면 노멀(법선)에 맞춰 이펙트 정렬
-            BulletEffect[type].Play(); // 이펙트 재생
+            BulletEffect.transform.position = position; // 이펙트 위치 설정
+            BulletEffect.transform.forward = normal; // 표면 노멀(법선)에 맞춰 이펙트 정렬
+            BulletEffect.Play(); // 이펙트 재생
         
     }
     

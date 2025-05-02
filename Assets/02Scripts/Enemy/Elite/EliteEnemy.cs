@@ -136,6 +136,7 @@ private Animator _animator;
 
     private void Start()
     { 
+        BloodParticles.Stop();
 _animator = GetComponentInChildren<Animator>();
         DamagedEffect.ColorChangeTime = _colorChangeTime;
         DamagedEffect.FindAllMaterials();
@@ -287,8 +288,9 @@ _animator = GetComponentInChildren<Animator>();
         if (_currentState == EnemyState.Die) return;
 
         _currentHealth -= damage.Value;
-        _knockbackDirection = -damage.HitDirection.normalized;
-        _knockbackForce = damage.KnockBackPower;
+        
+        Bleed(damage.HitTransform, damage.HitDirection.normalized);
+        
         //Debug.Log($"{gameObject.name} 피격! 현재 체력: {_currentHealth}, 받은 데미지: {damage.Value}, 넉백힘: {_knockbackForce}");
 
 

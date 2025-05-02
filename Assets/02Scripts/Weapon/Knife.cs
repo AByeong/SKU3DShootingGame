@@ -13,7 +13,7 @@ public class Knife : Weapon
 
     public override void Initialize()
     {
-        
+
     }
 
     public override void Fire()
@@ -41,6 +41,8 @@ public class Knife : Weapon
 
                     Damage damage = new Damage();
                     damage.Value = DamageValue;
+                    damage.HitTransform = new Vector3(collider.transform.position.x, Camera.main.transform.position.y, collider.transform.position.z);
+                    damage.HitDirection = dirToTarget;
 
                     if (collider.CompareTag("Enemy"))
                     {
@@ -48,7 +50,7 @@ public class Knife : Weapon
                         if (enemy != null)
                         {
                             enemy.TakeDamage(damage);
-                            
+                            //PlayImpactEffect(collider.ClosestPoint(FirePosition.position), (FirePosition.position - collider.transform.position).normalized, 0); // 피격 위치와 플레이어를 바라보는 법선 전달
                             Debug.Log($"{collider.name}에게 {damage.Value}만큼 데미지!");
                         }
                     }
@@ -62,22 +64,27 @@ public class Knife : Weapon
     }
     private void PlayImpactEffect(Vector3 position, Vector3 normal, int type)
     {
-        BulletEffect[type].transform.position = position; // 이펙트 위치 설정
-        BulletEffect[type].transform.forward = normal; // 표면 노멀(법선)에 맞춰 이펙트 정렬
-        BulletEffect[type].Play(); // 이펙트 재생
-        
+        if (BulletEffect != null)
+        {
+            BulletEffect.transform.position = position; // 이펙트 위치 설정
+            BulletEffect.transform.forward = normal; // 표면 노멀(법선)에 맞춰 이펙트 정렬
+            BulletEffect.Play(); // 이펙트 재생
+        }
+        else
+        {
+            Debug.LogWarning("BulletEffect 배열이 제대로 설정되지 않았거나, 요청된 타입의 이펙트가 없습니다.", this);
+        }
     }
 
     public override void Reroll()
     {
-        
+
     }
 
     private void Update()
     {
-        
-          
-        
+
+
     }
 
     private void OnDrawGizmos()
@@ -118,11 +125,11 @@ public class Knife : Weapon
         Gizmos.DrawLine(p1, p2);
         Gizmos.DrawLine(p2, p3);
         Gizmos.DrawLine(p3, p1);
-        
+
 #if UNITY_EDITOR
         Handles.color = new Color(1f, 0f, 0f, 0.3f); // 반투명 빨간색
         Handles.DrawAAConvexPolygon(p1, p2, p3);
 #endif
     }
-    
+
 }

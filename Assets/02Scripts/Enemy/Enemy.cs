@@ -105,6 +105,7 @@ private Animator _animator;
 
     private void Awake() // Start 대신 Awake에서 컴포넌트 가져오기 (다른 스크립트의 Start에서 참조 시 안전)
     {
+        BloodParticles.Stop();
         DamagedEffect = GetComponent<DamagedEffect>();
         _player = GameObject.FindGameObjectWithTag("Player");
         _characterController = GetComponent<CharacterController>();
@@ -282,7 +283,7 @@ _animator = GetComponentInChildren<Animator>();
                 
                 break;
             case EnemyState.Die:
-                if (_agent != null)
+                if (_agent.enabled == true)
                 {
                     _agent.isStopped = true;
                     _agent.enabled = false;
@@ -301,6 +302,7 @@ _animator = GetComponentInChildren<Animator>();
         _currentHealth -= damage.Value;
         _knockbackDirection = -damage.HitDirection.normalized;
         _knockbackForce = damage.KnockBackPower;
+        Bleed(damage.HitTransform, damage.HitDirection.normalized);
         Debug.Log($"{gameObject.name} 피격! 현재 체력: {_currentHealth}, 받은 데미지: {damage.Value}, 넉백힘: {_knockbackForce}");
 
 

@@ -57,6 +57,7 @@ public class BossFSM : MonoBehaviour, IDamagable
 private float _timer;
 private bool _isChangingColor = false;
 private Coroutine _colorChangeCoroutine;
+public ParticleSystem BloodParticle;
     
 
     [Header("보스 정보")]
@@ -116,6 +117,7 @@ private Coroutine _colorChangeCoroutine;
     }
     private void Start()
     {
+        BloodParticle.Stop();
         DamagedEffect.ColorChangeTime = _colorChangeTime;
         
         
@@ -245,7 +247,12 @@ private Coroutine _colorChangeCoroutine;
                 break;
         }
     }
-
+    public void Bleed(Vector3 position, Vector3 direction)
+    {
+        BloodParticle.transform.position = position;
+        BloodParticle.transform.rotation = Quaternion.LookRotation(direction);
+        BloodParticle.Play();
+    }
     public void Activate()//처음 비활성화 상태에서 활성화시키기
     {
         _animator.SetTrigger(Triggers[(int)Trigger.Activate]);
@@ -317,6 +324,8 @@ private Coroutine _colorChangeCoroutine;
         
         Debug.Log($"BOSS : Damaged! Received {damage.Value} damage.");
         _currentHealth -= damage.Value/Defense;
+
+        Bleed(damage.HitTransform, damage.HitDirection);
 
 
         DamagedEffect.StartColorChange();

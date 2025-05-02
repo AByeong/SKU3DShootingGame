@@ -572,6 +572,73 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1001 &2390905016637656827
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8099530012392664951}
+    m_Modifications:
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.96551853
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.25998974
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.0129318535
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.0034822214
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8758898395227299648, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_Name
+      value: Bleed
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+--- !u!4 &6330873735105062606 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+  m_PrefabInstance: {fileID: 2390905016637656827}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &7224726104506949989 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 5002744288912863134, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+  m_PrefabInstance: {fileID: 2390905016637656827}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6440322480498281677
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1059,6 +1126,9 @@ PrefabInstance:
       addedObject: {fileID: 3410170692244822941}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 248989133b088e54c98905d200474d88, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 6330873735105062606}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 248989133b088e54c98905d200474d88, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 2404848697177971680}
     - targetCorrespondingSourceObject: {fileID: 2563496969622287784, guid: 248989133b088e54c98905d200474d88, type: 3}
       insertIndex: -1
@@ -1110,6 +1180,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 085792c77aeb1db4a837857c8c2e6ae2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _materials: []
+  _originalColors: []
+  ColorChangeTime: 0.1
+  _emissionIntensity: 1
 --- !u!114 &7802911297923563204
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1137,7 +1211,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Pool: {fileID: 0}
   UIEnemy: {fileID: 3210457258142534056}
-  BloodParticles: {fileID: 0}
+  BloodParticles: {fileID: 7224726104506949989}
   Type: 0
   _moveMode: 1
   PatrolPoints: {fileID: 11400000, guid: 44f9ff9880fcd244688c6c9456e31e4c, type: 2}
@@ -1148,6 +1222,7 @@ MonoBehaviour:
   FindDistance: 20
   AttackDistance: 5
   ReturnDistance: 15
+  _colorChangeTime: 0.1
   AttackCoolTime: 2
   DamagedTime: 0.5
   DeathTime: 2
