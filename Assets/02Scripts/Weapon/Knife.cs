@@ -48,6 +48,7 @@ public class Knife : Weapon
                         if (enemy != null)
                         {
                             enemy.TakeDamage(damage);
+                            
                             Debug.Log($"{collider.name}에게 {damage.Value}만큼 데미지!");
                         }
                     }
@@ -59,7 +60,13 @@ public class Knife : Weapon
             lastFireForward = forward;
         }
     }
-
+    private void PlayImpactEffect(Vector3 position, Vector3 normal, int type)
+    {
+        BulletEffect[type].transform.position = position; // 이펙트 위치 설정
+        BulletEffect[type].transform.forward = normal; // 표면 노멀(법선)에 맞춰 이펙트 정렬
+        BulletEffect[type].Play(); // 이펙트 재생
+        
+    }
 
     public override void Reroll()
     {

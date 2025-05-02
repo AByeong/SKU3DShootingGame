@@ -11,7 +11,7 @@ public abstract class Weapon : MonoBehaviour
     
     
     [Header("에셋")]
-    public ParticleSystem BulletEffect;
+    public ParticleSystem[] BulletEffect;
     public TrailRenderer BulletTrailPrefab;
     [Header("UI")]
     public UI_Bullet BulletUI;

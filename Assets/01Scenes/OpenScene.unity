@@ -2124,7 +2124,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Animator: {fileID: 5866666020782439235}
-  BulletEffect: {fileID: 0}
+  BulletEffect: []
   BulletTrailPrefab: {fileID: 0}
   BulletUI: {fileID: 33662476}
   CurrentAmmo: 10
@@ -6892,6 +6892,63 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3909508500138732003, guid: 72aa0d56e802d3d46a6761eb119a3ecb, type: 3}
   m_PrefabInstance: {fileID: 652581439}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &655157937
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 543450652612403513}
+    m_Modifications:
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8758898395227299648, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+      propertyPath: m_Name
+      value: Bleed
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
 --- !u!1001 &667587900
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7618,6 +7675,11 @@ Transform:
 --- !u!4 &711324497 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400002, guid: 54dd9cb5740188a488b8baebbf19207c, type: 3}
+  m_PrefabInstance: {fileID: 953209255}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &711324500 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 19800002, guid: 54dd9cb5740188a488b8baebbf19207c, type: 3}
   m_PrefabInstance: {fileID: 953209255}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &716572301
@@ -12839,7 +12901,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Animator: {fileID: 5866666020782439235}
-  BulletEffect: {fileID: 403916673}
+  BulletEffect:
+  - {fileID: 711324500}
+  - {fileID: 1821693459}
   BulletTrailPrefab: {fileID: 7069609822894666453, guid: 9cdec9bc0577e9d4391f7bcc8142d16a, type: 3}
   BulletUI: {fileID: 33662476}
   CurrentAmmo: 0
@@ -15357,6 +15421,16 @@ MonoBehaviour:
   m_Bidirectional: 1
   m_AutoUpdatePosition: 0
   m_Area: 0
+--- !u!4 &1821693457 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8572033921316464693, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+  m_PrefabInstance: {fileID: 655157937}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &1821693459 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 5002744288912863134, guid: 35bf8a00862dc4848b39b19817e166fb, type: 3}
+  m_PrefabInstance: {fileID: 655157937}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1833929305
 GameObject:
   m_ObjectHideFlags: 0
@@ -19263,6 +19337,7 @@ Transform:
   - {fileID: 5465940245459812781}
   - {fileID: 5639405849604180798}
   - {fileID: 711324497}
+  - {fileID: 1821693457}
   - {fileID: 2132053642}
   - {fileID: 945522278}
   - {fileID: 31904928}

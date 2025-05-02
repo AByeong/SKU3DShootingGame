@@ -44,14 +44,24 @@ public class DefaultGun : Weapon
 
                 if (damageHitInfo.collider.TryGetComponent<IDamagable>(out IDamagable damagable))
                 {
+                    
+                    
                     damagable.TakeDamage(damage);
                 }
 
 
                 // --- 피격 이펙트 재생 ---
-                if (BulletEffect != null)
+                if (BulletEffect.Length != 0)
                 {
-                    PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal);
+
+                    if (damageHitInfo.collider.CompareTag("Enemy"))
+                    {
+                        PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal,1);
+                    }
+                    else
+                    {
+                        PlayImpactEffect(damageHitInfo.point, damageHitInfo.normal,0);
+                    }
                 }
                 
                 // --- 총알 궤적 생성 ---
@@ -73,12 +83,11 @@ public class DefaultGun : Weapon
     
 
     //***************피격 이팩트 재생**********
-    private void PlayImpactEffect(Vector3 position, Vector3 normal)
+    private void PlayImpactEffect(Vector3 position, Vector3 normal, int type)
     {
-        
-            BulletEffect.transform.position = position; // 이펙트 위치 설정
-            BulletEffect.transform.forward = normal; // 표면 노멀(법선)에 맞춰 이펙트 정렬
-            BulletEffect.Play(); // 이펙트 재생
+            BulletEffect[type].transform.position = position; // 이펙트 위치 설정
+            BulletEffect[type].transform.forward = normal; // 표면 노멀(법선)에 맞춰 이펙트 정렬
+            BulletEffect[type].Play(); // 이펙트 재생
         
     }
     

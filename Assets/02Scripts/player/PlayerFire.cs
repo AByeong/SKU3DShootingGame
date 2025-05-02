@@ -403,16 +403,7 @@ public class PlayerFire : MonoBehaviour
         BulletUI.StopReroll(); // UI에 재장전 완료 알림
         _rerollCoroutine = null; // 코루틴 참조 제거
     }
-
-    private void PlayImpactEffect(Vector3 position, Vector3 normal)
-    {
-         if (BulletEffect != null)
-         {
-            BulletEffect.transform.position = position; // 이펙트 위치 설정
-            BulletEffect.transform.forward = normal; // 표면 노멀(법선)에 맞춰 이펙트 정렬
-            BulletEffect.Play(); // 이펙트 재생
-         }
-    }
+    
 
 
     private void SpawnTrail(Vector3 startPoint, Vector3 endPoint)
