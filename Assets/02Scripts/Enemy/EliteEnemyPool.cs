@@ -4,10 +4,12 @@ using UnityEngine;
 using Random = System.Random;
 
 // Enemy 컴포넌트를 풀링하는 GenericObjectPool을 상속
-public class EliteEnemyPool : GenericObjectPool<EliteEnemy>
+public class EliteEnemyPool : MultiGenericObjectPool<EliteEnemy>
 {
      [Tooltip("스폰 활성화 여부")]
      public bool SpawnSwitch = true;
+
+     public GameObject[] Monsters;
      
      [Header("스폰파라미터")]
      public float SpawnInterval = 2f;

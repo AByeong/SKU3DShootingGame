@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 // T 타입의 컴포넌트를 가진 게임 오브젝트를 풀링하는 제네릭 클래스
 // T는 반드시 Component를 상속받아야 함 
 public class GenericObjectPool<T> : MonoBehaviour where T : Component
 {
+    [FormerlySerializedAs("_prefab")]
     [Header("풀링 설정")]
     [Tooltip("풀링할 오브젝트의 프리팹 (T 타입 컴포넌트 포함)")]
-    [SerializeField] private T _prefab; // 풀링할 원본 프리팹 (T 타입 컴포넌트가 있어야 함)
+    [SerializeField] public T Prefab; // 풀링할 원본 프리팹 (T 타입 컴포넌트가 있어야 함)
 
     [Tooltip("초기 풀 크기")]
     [SerializeField] private int _initialPoolSize = 10; // 처음에 생성해 둘 오브젝트 개수
@@ -21,7 +23,7 @@ public class GenericObjectPool<T> : MonoBehaviour where T : Component
     private void Awake()
     {
         // 프리팹이 할당되었는지 확인
-        if (_prefab == null)
+        if (Prefab == null)
         {
             Debug.LogError($"[{typeof(T).Name} Pool] 프리팹이 할당되지 않았습니다!");
             enabled = false; // 오류 발생 시 스크립트 비활성화
@@ -44,12 +46,12 @@ public class GenericObjectPool<T> : MonoBehaviour where T : Component
     private T CreateNewObject(bool activate = true)
     {
         // 프리팹으로부터 새 게임 오브젝트 인스턴스 생성
-        T newInstance = Instantiate(_prefab);
+        T newInstance = Instantiate(Prefab);
 
         // 생성된 인스턴스가 T 타입 컴포넌트를 가지고 있는지 확인 (Instantiate는 원본 프리팹과 동일한 컴포넌트를 보장함)
         if (newInstance == null)
         {
-            Debug.LogError($"[{typeof(T).Name} Pool] 프리팹 '{_prefab.name}'에서 컴포넌트 '{typeof(T).Name}'을 찾을 수 없습니다!", _prefab);
+            Debug.LogError($"[{typeof(T).Name} Pool] 프리팹 '{Prefab.name}'에서 컴포넌트 '{typeof(T).Name}'을 찾을 수 없습니다!", Prefab);
             return null; // 오류 시 null 반환
         }
 

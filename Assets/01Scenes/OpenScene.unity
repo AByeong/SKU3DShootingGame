@@ -1233,6 +1233,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1477670034}
+  - {fileID: 764396485}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &117840571
@@ -7880,10 +7881,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe64d4209b1c49040ae62ff700e16e83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _prefab: {fileID: 787902429273425384, guid: 877aa25469635d144b5ae84de450e4c3, type: 3}
-  _initialPoolSize: 5
+  Prefabs:
+  - {fileID: 787902429273425384, guid: 36b110f35a0147f4886820519ddac36a, type: 3}
+  - {fileID: 787902429273425384, guid: 877aa25469635d144b5ae84de450e4c3, type: 3}
+  _initialPoolSize: 10
   _allowGrowth: 0
   SpawnSwitch: 1
+  Monsters: []
   SpawnInterval: 2
   Radius: 5
 --- !u!4 &764396485
@@ -7894,12 +7898,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 764396483}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.8, y: 8.74, z: 167.3}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.6000004, y: 0.34000015, z: 133}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 106607862}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &767021516
 PrefabInstance:
@@ -12718,7 +12722,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4772bdc30c1928c4ab397cdb7f222e01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _prefab: {fileID: 5574244657281963107, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
+  Prefab: {fileID: 5574244657281963107, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
   _initialPoolSize: 10
   _allowGrowth: 0
   SpawnSwitch: 1
@@ -29091,6 +29095,5 @@ SceneRoots:
   - {fileID: 32106719}
   - {fileID: 1558712699}
   - {fileID: 2245797795175410216}
-  - {fileID: 764396485}
   - {fileID: 1027926678}
   - {fileID: 2526911641432604764}
