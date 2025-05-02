@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 
 public class Barrel : MonoBehaviour, IDamagable
 {
+    public DamagedEffect DamagedEffect {get;set; }
     [SerializeField] private int _health = 10;
     [SerializeField] private int _damage = 10;
     private Tweener _tweener;
@@ -21,8 +22,11 @@ public class Barrel : MonoBehaviour, IDamagable
     [SerializeField] private float _explosionPower = 2f;
     private void Awake()
     {
+        DamagedEffect = GetComponent<DamagedEffect>();
         _tweener = transform.DOShakeRotation(0.1f, 1f).SetAutoKill(false).Pause().SetRelative();
         _rb = GetComponent<Rigidbody>();
+        DamagedEffect.ColorChangeTime = 0.1f;
+        DamagedEffect.FindAllMaterials();
     }
 
     private void Explode()
@@ -69,7 +73,7 @@ public class Barrel : MonoBehaviour, IDamagable
         _health -= damage.Value;
         _tweener.Restart();
         Debug.Log(_health);
-        
+        DamagedEffect.StartColorChange();
         if(_health <= 0 && !isExploded) Explode();
         
     }

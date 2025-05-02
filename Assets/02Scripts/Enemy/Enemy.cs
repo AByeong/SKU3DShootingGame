@@ -10,6 +10,7 @@ using Random = UnityEngine.Random; // Random 사용을 위해 추가
 
 public class Enemy : MonoBehaviour, IDamagable
 {
+    public DamagedEffect DamagedEffect {get;set;}
 private Animator _animator;
     public EnemyPool Pool;
 
@@ -67,6 +68,7 @@ private Animator _animator;
     public float AttackDistance = 2.5f;
     [Tooltip("초기 위치로 복귀를 시작하는 거리 (Normal 타입만 해당)")]
     public float ReturnDistance = 10f;
+    [SerializeField] private float _colorChangeTime = 0.1f;
 
     [Header("타이머 및 시간")]
     [Tooltip("공격 쿨타임")]
@@ -103,6 +105,7 @@ private Animator _animator;
 
     private void Awake() // Start 대신 Awake에서 컴포넌트 가져오기 (다른 스크립트의 Start에서 참조 시 안전)
     {
+        DamagedEffect = GetComponent<DamagedEffect>();
         _player = GameObject.FindGameObjectWithTag("Player");
         _characterController = GetComponent<CharacterController>();
         _agent = GetComponent<NavMeshAgent>();
@@ -123,6 +126,8 @@ private Animator _animator;
     private void Start()
     { 
 _animator = GetComponentInChildren<Animator>();
+    DamagedEffect.ColorChangeTime = _colorChangeTime;
+    DamagedEffect.FindAllMaterials();
         
         // 이동 모드 설정 (Awake에서 가져온 컴포넌트 기반)
         SetupMovementMode();
@@ -233,40 +238,61 @@ _animator = GetComponentInChildren<Animator>();
         {
             case EnemyState.Idle:
             {
+                _agent.enabled = true;
+                _agent.isStopped = true;
+                
                 Idle(); 
                 break;
             }
             case EnemyState.Patrol:
             {
+                _agent.enabled = true;
+                _agent.isStopped = false;
+                
                 Patrol(); 
                 break;
             }
             case EnemyState.Trace:
             {
+                _agent.enabled = true;
+                _agent.isStopped = false;
+                
                 Trace(); 
                 break;
             }
             case EnemyState.Return:
             {
+                _agent.enabled = true;
+                _agent.isStopped = false;
+                
                 Return(); 
                 break;
             }
             case EnemyState.Attack:
             {
+                _agent.enabled = true;
+                _agent.isStopped = true;
+                
                 Attack(); 
                 break;
             }
             case EnemyState.Damaged:
+                _agent.enabled = true;
+                _agent.isStopped = true;
                 
                 break;
             case EnemyState.Die:
-                _agent.isStopped = true;
-                _agent.enabled = false;
-                _collider.enabled = false;
+                if (_agent != null)
+                {
+                    _agent.isStopped = true;
+                    _agent.enabled = false;
+                    _collider.enabled = false;
+                }
                 break;
         }
     }
 
+   
     // 데미지 받는 함수
     public void TakeDamage(Damage damage)
     {
@@ -303,6 +329,7 @@ _animator = GetComponentInChildren<Animator>();
         }
         
         UIEnemy.Refresh_HPBar(_currentHealth);
+        DamagedEffect.StartColorChange();
     }
 
     // 상태 변경 함수 

@@ -8,6 +8,8 @@ using Debug = UnityEngine.Debug;
 
 public class BossFSM : MonoBehaviour, IDamagable
 {
+    public DamagedEffect DamagedEffect {get;set;}    
+    
     public enum BossState
     {
         Deactive,
@@ -49,12 +51,12 @@ public class BossFSM : MonoBehaviour, IDamagable
     [SerializeField] private int _rushDamage = 20;
     
 [Header("피격시 데미지")]
+[SerializeField]private float _colorChangeTime;
 [SerializeField]private List<Material> _materials;
 [SerializeField]private List<Color> _originalColors;
-private Coroutine _colorChangeCoroutine;
-private float _colorChangeTime;
 private float _timer;
 private bool _isChangingColor = false;
+private Coroutine _colorChangeCoroutine;
     
 
     [Header("보스 정보")]
@@ -105,14 +107,18 @@ private bool _isChangingColor = false;
 
     private void Awake()
     {
+        DamagedEffect = gameObject.GetComponent<DamagedEffect>();
         _agent = GetComponent<NavMeshAgent>();
         _player = GameObject.FindGameObjectWithTag("Player");
         _animator = GetComponent<Animator>();
         _collider = GetComponent<Collider>();
-        FindAllMaterials(); // 머티리얼 배열 업데이트 (동적으로 렌더러가 추가/제거될 경우 대비)
+        DamagedEffect.FindAllMaterials(); // 머티리얼 배열 업데이트 (동적으로 렌더러가 추가/제거될 경우 대비)
     }
     private void Start()
     {
+        DamagedEffect.ColorChangeTime = _colorChangeTime;
+        
+        
         _currentHealth = _maxHealth;
         UI_BOSS.Refresh_HPBar(_currentHealth);
     }
@@ -313,7 +319,7 @@ private bool _isChangingColor = false;
         _currentHealth -= damage.Value/Defense;
 
 
-        StartColorChange(0.1f);
+        DamagedEffect.StartColorChange();
         
         
         UI_BOSS.Refresh_HPBar(_currentHealth);
@@ -383,87 +389,5 @@ private bool _isChangingColor = false;
     
     
 
-
-    // 자신과 자식들의 모든 렌더러에서 모든 머티리얼을 찾아 리스트에 저장
-    private void FindAllMaterials()
-    {
-        Renderer[] renderers = GetComponentsInChildren<Renderer>();
-        _materials.Clear();
-        _originalColors.Clear();
-
-        foreach (Renderer renderer in renderers)
-        {
-            if (renderer.materials != null && renderer.materials.Length > 0)
-            {
-                foreach (Material material in renderer.materials)
-                {
-                    _materials.Add(material);
-                    _originalColors.Add(material.color);
-                }
-            }
-        }
-    }
-
-    public void StartColorChange(float duration)
-    {
-        if (_isChangingColor) return;
-
-        FindAllMaterials(); // 머티리얼 리스트 업데이트
-
-        if (_materials.Count == 0)
-        {
-            Debug.LogWarning($"{gameObject.name} 또는 자식 오브젝트에 렌더러가 없습니다.", this);
-            return;
-        }
-
-        _colorChangeTime = duration;
-        _timer = 0f;
-        _isChangingColor = true;
-
-        // 모든 머티리얼의 색상을 빨간색으로 변경하고 코루틴 시작
-        for (int i = 0; i < _materials.Count; i++)
-        {
-            if (_materials[i] != null)
-            {
-                _materials[i].color = Color.red;
-            }
-        }
-
-        StartCoroutine(ChangeColorCoroutine());
-    }
-
-    private System.Collections.IEnumerator ChangeColorCoroutine()
-    {
-        while (_timer < _colorChangeTime)
-        {
-            _timer += Time.deltaTime;
-            float normalizedTime = Mathf.Clamp01(_timer / _colorChangeTime);
-
-            // 빨간색에서 흰색으로 보간
-            Color currentColor = Color.Lerp(Color.red, Color.white, normalizedTime);
-
-            // 모든 머티리얼의 색상 업데이트
-            for (int i = 0; i < _materials.Count; i++)
-            {
-                if (_materials[i] != null)
-                {
-                    _materials[i].color = currentColor;
-                }
-            }
-
-            yield return null;
-        }
-
-        // 색상 변경 완료 후 원래 색상으로 복원 (선택 사항)
-        // for (int i = 0; i < _materials.Count; i++)
-        // {
-        //     if (_materials[i] != null && i < _originalColors.Count)
-        //     {
-        //         _materials[i].color = _originalColors[i];
-        //     }
-        // }
-
-        _isChangingColor = false;
-    }
     
 }

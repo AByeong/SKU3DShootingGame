@@ -10,6 +10,8 @@ using Random = UnityEngine.Random; // Random 사용을 위해 추가
 
 public class EliteEnemy : MonoBehaviour, IDamagable
 {
+    public DamagedEffect DamagedEffect {get;set;}
+    
     [Header("근접공격 파라미터")]
     public GameObject AttackEffect;
     public Transform AttackTransform;
@@ -80,6 +82,7 @@ private Animator _animator;
     public float ReturnDistance = 10f;
 
     [Header("타이머 및 시간")]
+    [SerializeField] private float _colorChangeTime = 0.1f;
     [Tooltip("공격 쿨타임")]
     public float AttackCoolTime = 1f;
     [Tooltip("피격 시 경직 시간")]
@@ -113,6 +116,7 @@ private Animator _animator;
 
     private void Awake() // Start 대신 Awake에서 컴포넌트 가져오기 (다른 스크립트의 Start에서 참조 시 안전)
     {
+        DamagedEffect = GetComponent<DamagedEffect>();
         _player = GameObject.FindGameObjectWithTag("Player");
         _characterController = GetComponent<CharacterController>();
         _agent = GetComponent<NavMeshAgent>();
@@ -133,7 +137,8 @@ private Animator _animator;
     private void Start()
     { 
 _animator = GetComponentInChildren<Animator>();
-        
+        DamagedEffect.ColorChangeTime = _colorChangeTime;
+        DamagedEffect.FindAllMaterials();
         // 이동 모드 설정 (Awake에서 가져온 컴포넌트 기반)
         SetupMovementMode();
         
@@ -273,6 +278,8 @@ _animator = GetComponentInChildren<Animator>();
                 break;
         }
     }
+    
+    
 
     // 데미지 받는 함수
     public void TakeDamage(Damage damage)
@@ -311,6 +318,7 @@ _animator = GetComponentInChildren<Animator>();
         }
         
         UIEnemy.Refresh_HPBar(_currentHealth);
+        DamagedEffect.StartColorChange();
     }
 
     // 상태 변경 함수 
@@ -686,4 +694,11 @@ _animator = GetComponentInChildren<Animator>();
         Debug.Log($"{gameObject.name} Deactivated");
         Pool.EnemyDie(this);
     }
+    
+    
+    
+    
+    
+    
+    
 }

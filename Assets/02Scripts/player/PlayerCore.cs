@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class PlayerCore : MonoBehaviour, IDamagable
 {
+    public DamagedEffect DamagedEffect { get; set; }
     public PlayerDataSO playerData;
     public UI_PlayerHP UIHP;
     
@@ -32,6 +33,7 @@ public class PlayerCore : MonoBehaviour, IDamagable
     private void Start()
     {
         UIHP.Refresh_HPBar(_currentHealth);
+        DamagedEffect.ColorChangeTime = 0f;
     }
 
     public void GetCoin()
