@@ -9019,7 +9019,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4772bdc30c1928c4ab397cdb7f222e01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _prefab: {fileID: 5574244657281963107, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
+  Prefab: {fileID: 5574244657281963107, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
   _initialPoolSize: 10
   _allowGrowth: 0
   SpawnSwitch: 1
@@ -9348,6 +9348,13 @@ MonoBehaviour:
   CameraView: 0
   InitialTPSToPlayerDistance: 3
   InitialTPSCameraHeight: 1.5
+  QuarterViewShakeRotationStrength: {x: 1, y: 1, z: 1}
+  QuarterViewShakeRotationFrequency: 10
+  QuarterViewShakeRotationDuration: 0.2
+  FOVShakeIntensity: 2
+  FOVShakeDuration: 0.15
+  ViewportShakeIntensity: 0.02
+  ViewportShakeDuration: 0.1
 --- !u!1001 &1534003949
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11695,6 +11702,7 @@ MonoBehaviour:
   FindDistance: 10
   AttackDistance: 3
   ReturnDistance: 10
+  _colorChangeTime: 0.1
   AttackCoolTime: 1
   DamagedTime: 0.5
   DeathTime: 2

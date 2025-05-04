@@ -1733,6 +1733,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e49abdeaa52cfa54099d29d9e14cd3d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  WeaponIconImages: []
+  WeaponIcon: {fileID: 0}
   CameraFollow: {fileID: 0}
   PlayerCore: {fileID: 0}
   SwapWeapon: {fileID: 0}
@@ -1744,7 +1746,8 @@ MonoBehaviour:
   BulletEffect: {fileID: 2004277351}
   ZoomInSize: 15
   ZoomOutSize: 60
-  UI_Crosshair: {fileID: 0}
+  UI_Crosshair:
+  - {fileID: 0}
   UI_SniperZoom: {fileID: 0}
   BombUI: {fileID: 0}
   BulletUI: {fileID: 0}
