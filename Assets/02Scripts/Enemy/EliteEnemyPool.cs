@@ -6,6 +6,9 @@ using Random = System.Random;
 // Enemy 컴포넌트를 풀링하는 GenericObjectPool을 상속
 public class EliteEnemyPool : MultiGenericObjectPool<EliteEnemy>
 {
+     
+     [Header("스폰 설정")]
+     public PatrolPoints PatrolPoints;
      [Tooltip("스폰 활성화 여부")]
      public bool SpawnSwitch = true;
 
@@ -51,6 +54,7 @@ public class EliteEnemyPool : MultiGenericObjectPool<EliteEnemy>
                          enemyInstance.transform.rotation = Quaternion.identity; // 기본 회전값
 
                          enemyInstance.Initialize(); // Enemy 스크립트에 이런 함수가 있다고 가정
+                         enemyInstance.PatrolPoints = PatrolPoints;
                     }
                     else
                     {

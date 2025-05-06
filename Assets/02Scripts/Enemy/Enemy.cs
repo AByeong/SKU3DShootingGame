@@ -110,7 +110,7 @@ private Animator _animator;
         _player = GameObject.FindGameObjectWithTag("Player");
         _characterController = GetComponent<CharacterController>();
         _agent = GetComponent<NavMeshAgent>();
-        _startPosition = transform.position;
+       // 
         _currentHealth = MaxHealth; // 시작 시 체력 초기화
         _collider = GetComponent<Collider>();
         Pool = FindAnyObjectByType <EnemyPool>();
@@ -178,6 +178,7 @@ _animator = GetComponentInChildren<Animator>();
                 break;
         }
         UIEnemy.Refresh_HPBar(_currentHealth);
+        _startPosition = transform.position;
         
     }
     

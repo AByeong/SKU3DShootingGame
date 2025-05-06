@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 47733696761762536}
+  - component: {fileID: 2969837229452090473}
   m_Layer: 0
   m_Name: NormalSpawner
   m_TagString: Untagged
@@ -31,9 +32,27 @@ Transform:
   m_Children:
   - {fileID: 6606997535851894412}
   - {fileID: 5989840072688513608}
-  - {fileID: 9155749601757599595}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2969837229452090473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1481951378019240421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4772bdc30c1928c4ab397cdb7f222e01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Prefab: {fileID: 5574244657281963107, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
+  _initialPoolSize: 10
+  _allowGrowth: 0
+  PatrolPoints: {fileID: 0}
+  SpawnSwitch: 1
+  SpawnInterval: 2
+  Radius: 0.1
 --- !u!1 &3769431570179680348
 GameObject:
   m_ObjectHideFlags: 0
@@ -206,53 +225,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1 &5592107669621506642
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 9155749601757599595}
-  - component: {fileID: 9034813808657699622}
-  m_Layer: 0
-  m_Name: EnemySpawner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &9155749601757599595
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5592107669621506642}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.07, y: 0.19, z: -1.25}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 47733696761762536}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &9034813808657699622
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5592107669621506642}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4772bdc30c1928c4ab397cdb7f222e01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Prefab: {fileID: 5574244657281963107, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
-  _initialPoolSize: 10
-  _allowGrowth: 0
-  SpawnSwitch: 1
-  SpawnInterval: 2
-  Radius: 5
