@@ -77,13 +77,11 @@ public class PlayerFire : MonoBehaviour
     private void Start()
     {
         // UI 초기화
-        BombUI.SetMaxBombCount(_maxBombCount);
         BulletUI.SetMaxBulletCount(_maxBulletCount);
 
         // 탄약/폭탄 초기화
         _currentBombCount = _maxBombCount;
         _currentBulletCount = _maxBulletCount;
-        BombUI.ChangeBombCount(_currentBombCount);
         BulletUI.ChangeBulletCount(_currentBulletCount);
 
         _currentChargePower = _minThrowPower; // 충전 파워 초기화
@@ -217,17 +215,19 @@ public class PlayerFire : MonoBehaviour
                 SwapWeapon.swap(0);
                 _animator.SetInteger("Weapon", 0);
                 _weaponIsBomb = false;
+                BulletUI.Refresh(_maxBulletCount,_currentBulletCount);
                 break;
 
             case 1:
                 SwapWeapon.swap(1);
                 _animator.SetInteger("Weapon", 1);
                 _weaponIsBomb = false;
+                BulletUI.Refresh(_maxBulletCount,_currentBulletCount);
                 break;
 
             case 2:
                 SwapWeapon.swap(2); // 놓치고 있던 부분 추가!
-                
+                BombUI.Refresh(_maxBombCount, _currentBombCount);
                 _animator.SetInteger("Weapon", 2); // 폭탄도 애니메이션에 포함된다면 필요
                 _weaponIsBomb = true;
                 break;

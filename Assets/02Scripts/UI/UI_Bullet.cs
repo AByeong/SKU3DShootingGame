@@ -13,12 +13,12 @@ public class UI_Bullet : MonoBehaviour
     private Coroutine _rerollCoroutine;
     public void SetMaxBulletCount(int value)
     {
-        MaxBulletCount.text = $"{value.ToString()}개";
+        MaxBulletCount.text = $"{value.ToString()}";
     }
     
     public void ChangeBulletCount(int value)
     {
-        CurrentBulletCount.text = $"{value.ToString()}개";
+        CurrentBulletCount.text = $"{value.ToString()}";
     }
 
     public void StartReroll(float needTime)
@@ -27,6 +27,12 @@ public class UI_Bullet : MonoBehaviour
         _rerollCoroutine = StartCoroutine(RerollCoroutine(needTime));
     }
 
+    public void Refresh(int Max, int Current)
+    {
+        SetMaxBulletCount(Max);
+        ChangeBulletCount(Current);
+        
+    }
     public void StopReroll()
     {
         if (_rerollCoroutine != null)

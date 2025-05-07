@@ -109,9 +109,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _health: 20
-  _damage: 10
+  _damage: 30
   ExplosionEffectPrefab: {fileID: 100002, guid: 6ecf76dc4f268d340b2666896a954bcc, type: 3}
-  _radius: 8
+  _radius: 10
   _time: 2
   _explosionPower: 20
 --- !u!208 &519256346676898949

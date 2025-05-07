@@ -36,6 +36,10 @@ public class Bomb : MonoBehaviour
                 //Collider[] hitDrumColliders = Physics.OverlapSphere(this.transform.position, _radius, (1 << 10));
                 foreach (Collider victim in hitColliders)
                 {
+                    if (victim.gameObject.tag == "Player")
+                    {
+                        continue;
+                    }
 
                     _isExploded = true;
                     Damage damage = new Damage

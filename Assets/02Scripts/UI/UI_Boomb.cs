@@ -11,17 +11,23 @@ public class UI_Boomb : MonoBehaviour
     [SerializeField] private Slider _boombSlider;
     public void SetMaxBombCount(int value)
     {
-        MaxBombCount.text = $"{value.ToString()}개";
+        MaxBombCount.text = $"{value.ToString()}";
     }
     
     public void ChangeBombCount(int bombCount)
     {
-        CurrentBombCount.text = $"{bombCount.ToString()}개";
+        CurrentBombCount.text = $"{bombCount.ToString()}";
     }
 
     public void ChargeBomb(float percentage)
     {
         _boombSlider.value = percentage;
         
+    }
+
+    public void Refresh(int Max, int Current)
+    {
+        SetMaxBombCount(Max);
+        ChangeBombCount(Current);
     }
 }
