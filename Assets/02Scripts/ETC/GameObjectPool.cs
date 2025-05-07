@@ -10,7 +10,7 @@ public class GenericObjectPool<T> : MonoBehaviour where T : Component
     [Header("풀링 설정")]
     [Tooltip("풀링할 오브젝트의 프리팹 (T 타입 컴포넌트 포함)")]
     [SerializeField] public T Prefab; // 풀링할 원본 프리팹 (T 타입 컴포넌트가 있어야 함)
-
+    [SerializeField] public bool SetParaent = false;
     [Tooltip("초기 풀 크기")]
     [SerializeField] private int _initialPoolSize = 10; // 처음에 생성해 둘 오브젝트 개수
 
@@ -56,6 +56,7 @@ public class GenericObjectPool<T> : MonoBehaviour where T : Component
         }
 
         // 생성된 오브젝트를 풀 관리자(이 게임 오브젝트)의 자식으로 넣어 Hierarchy 정리 (선택 사항)
+        if(SetParaent)
         newInstance.transform.SetParent(this.transform);
 
         // 기본적으로 비활성화 상태로 만들고 풀에 추가

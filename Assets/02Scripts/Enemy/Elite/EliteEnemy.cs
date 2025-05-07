@@ -163,6 +163,9 @@ _animator = GetComponentInChildren<Animator>();
 
     public void Initialize()
     {
+        _agent.enabled = false;
+        _agent.enabled = true;
+        
         _currentHealth = MaxHealth;
 
         switch (_moveMode)

@@ -41,12 +41,14 @@ public class BossFSM : MonoBehaviour, IDamagable
     [Header("소환 파라미터")]
     [SerializeField] private GameObject _ghost;
     [SerializeField] private int _summonCount;
+    [SerializeField] private float _summonRate = 5f;
+    private float _summonTimer = 0f;
     [SerializeField] private Transform _ghostTransform;
 
     [Header("돌진")]
     [SerializeField] private bool _rushable = true;
     [SerializeField] private float _rushSpeed = 10.0f;
-    public float RushRange;
+    public float RushRange = 0.5f;
     public Vector3 RushTransform; // 돌진 목표 위치 (추적 시작 시점의 플레이어 위치)
     [SerializeField] private int _rushDamage = 20;
     
@@ -127,6 +129,17 @@ public ParticleSystem BloodParticle;
    
     private void Update()
     {
+        if (CurrentState == BossState.Trace || CurrentState == BossState.Attack || CurrentState == BossState.Damaged)
+        {
+            _summonTimer += Time.deltaTime;
+        }
+        
+        if (_summonTimer >= _summonRate)
+        {
+            _animator.SetTrigger("Spell");
+            _summonTimer = 0f;
+            ChangeState(BossState.Summon);
+        }
         switch (CurrentState)
         {
             case BossState.Deactive:
@@ -136,7 +149,8 @@ public ParticleSystem BloodParticle;
                     ChangeState(BossState.Active);
                 }
                 break;
-
+            case BossState.Summon:
+                break;
             case BossState.Trace:
 
                 
@@ -150,32 +164,13 @@ public ParticleSystem BloodParticle;
                 }
                 break;
             
-
-            //case BossState.AttackDelay:
-                // _agent.isStopped = true;
-                //
-                // _attackDelayTimer += Time.deltaTime;
-                //
-                // if (Vector3.Distance(transform.position, _player.transform.position) >= _attackRange)
-                // {
-                //     _agent.isStopped = false;
-                //     ChangeState(BossState.Trace);
-                // }
-                //
-                // if (_attackDelayTimer > _attackDelayTime && Vector3.Distance(transform.position, _player.transform.position) < _attackRange)
-                // {_agent.isStopped = false;
-                //     Debug.Log("BOSS : Attack!");
-                //     _attackDelayTimer = 0f;
-                //     ChangeState(BossState.Attack);
-                // }
-             //   break;
             
             case BossState.Attack:
 
                 break;
             
             case BossState.Rush:
-                if (Vector3.Distance(transform.position, RushTransform) < 0.1f)
+                if (Vector3.Distance(transform.position, RushTransform) < RushRange)
                 {
                     ChangeState(BossState.RushAttack);
                 }
@@ -214,6 +209,7 @@ public ParticleSystem BloodParticle;
                 break;
 
             case BossState.Trace:
+                _agent.isStopped = false;
                 _animator.SetTrigger("Walking");
 
                 
@@ -226,8 +222,11 @@ public ParticleSystem BloodParticle;
                 
                 
                 break;
-
+            case BossState.Summon:
+                
+                break;
             case BossState.Rush:
+                _agent.isStopped = false;
                 _animator.SetTrigger("Rush");
                 _agent.speed = _rushSpeed;
                 RushTransform = _player.transform.position;
@@ -235,14 +234,17 @@ public ParticleSystem BloodParticle;
                 break;
             
             case BossState.RushAttack:
+                _agent.isStopped = true;
                 _animator.SetTrigger("RushAttack");
                 break;
             
             case BossState.Attack:
+                _agent.isStopped = true;
                 _animator.SetTrigger(Triggers[(int)Trigger.Attack]);
                 break;
             
             case BossState.Die:
+                _agent.isStopped = true;
                 _animator.SetTrigger("Die");
                 break;
         }
@@ -260,6 +262,7 @@ public ParticleSystem BloodParticle;
 
     public void Summon()//잡몹을 소환함
     {
+        _summonTimer = 0f;
         //_animator.SetTrigger(Triggers[(int)Trigger.Spell]);
         for (int i = 0; i < _summonCount; i++)
         {

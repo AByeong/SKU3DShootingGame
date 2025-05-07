@@ -5,9 +5,10 @@ using UnityEngine;
  public class EnemyPool : GenericObjectPool<Enemy>
  {
      [Header("Enemy 스폰 특정 설정")]
+     public Transform SpawnPoint;
      [Tooltip("순찰 지점 (월드 좌표 사용 가정)")]
      public PatrolPoints PatrolPoints;
-
+    
      [Tooltip("스폰 활성화 여부")]
      public bool SpawnSwitch = true;
 
@@ -79,20 +80,24 @@ using UnityEngine;
              
 
              // 3. 최종 스폰 위치 설정: 계산된 월드 좌표의 X, Z 값을 사용하고, Y 값은 1.1f로 고정
-             Vector3 finalSpawnPosition = new Vector3(transform.position.x + Random.Range(0,Radius), 1.1f, transform.position.z+ Random.Range(0,Radius));
+             //Vector3 finalSpawnPosition = new Vector3(transform.position.x + Random.Range(0,Radius), 1.1f, transform.position.z+ Random.Range(0,Radius));
+             Vector3 finalSpawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
 
              // 4. 부모 설정 해제 및 최종 위치/회전 적용
-             enemyInstance.transform.SetParent(null);
              enemyInstance.transform.position = finalSpawnPosition;
              enemyInstance.transform.rotation = Quaternion.identity;
 
              // 5. 월드 좌표를 사용하는 PatrolPoints 할당
              enemyInstance.PatrolPoints = PatrolPoints;
-
-             // 6. Enemy 초기화 (Enemy 스크립트 내 Initialize 구현 필요)
+             
+             enemyInstance.name = this.name + "Enemy";
+             enemyInstance.StartPosition = finalSpawnPosition;
+             
+             enemyInstance.DebugPosition("소환된");
+             
              enemyInstance.Initialize();
 
-             // Debug.Log($"Enemy spawned: {enemyInstance.name} at world position: {finalSpawnPosition}");
+             
          }
          else
          {

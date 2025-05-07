@@ -10,6 +10,7 @@ using Random = UnityEngine.Random; // Random 사용을 위해 추가
 
 public class Enemy : MonoBehaviour, IDamagable
 {
+    [SerializeField] private bool _stateTracker = false;
     public DamagedEffect DamagedEffect {get;set;}
 private Animator _animator;
     public EnemyPool Pool;
@@ -41,7 +42,7 @@ private Animator _animator;
     [Tooltip("적의 타입을 선택합니다.")]
     public EnemyType Type = EnemyType.Normal;
     [Tooltip("적의 이동 방식을 선택합니다.")]
-    public MovementMode _moveMode = MovementMode.CharacterController;
+    public MovementMode _moveMode = MovementMode.NavMeshAgent;
 
     [Header("정찰")]
     [Tooltip("정찰 지점으로 사용할 자식 오브젝트들의 Transform 목록")]
@@ -90,7 +91,7 @@ private Animator _animator;
     [SerializeField] private GameObject _player;
     private CharacterController _characterController;
     private NavMeshAgent _agent;
-    private Vector3 _startPosition;
+    public Vector3 StartPosition;
     private float _attackTimer = 0f;
     private float _idleTimer = 0f;
     private Collider _collider;
@@ -99,12 +100,17 @@ private Animator _animator;
     private Vector3 _knockbackDirection;
     private float _knockbackForce;
     private Coroutine _damageCoroutine;
-    
-   
+
+    public void DebugPosition(string CheckPoint)
+    {
+        Debug.Log($"{CheckPoint}시점의 {this.name}의 위치가 {this.transform.position}");
+    }
 
 
     private void Awake() // Start 대신 Awake에서 컴포넌트 가져오기 (다른 스크립트의 Start에서 참조 시 안전)
     {
+        
+        
         BloodParticles.Stop();
         DamagedEffect = GetComponent<DamagedEffect>();
         _player = GameObject.FindGameObjectWithTag("Player");
@@ -122,6 +128,8 @@ private Animator _animator;
         if (_agent == null) Debug.LogWarning("NavMeshAgent 컴포넌트 없음", this);
         
         DamagedTime = 70 * Time.deltaTime;
+        
+        
     }
 
     private void Start()
@@ -153,6 +161,8 @@ _animator = GetComponentInChildren<Animator>();
 
     public void Initialize()
     {
+        _agent.enabled = false;
+        _agent.enabled = true;
         _currentHealth = MaxHealth;
 
         switch (_moveMode)
@@ -178,14 +188,15 @@ _animator = GetComponentInChildren<Animator>();
                 break;
         }
         UIEnemy.Refresh_HPBar(_currentHealth);
-        _startPosition = transform.position;
-        
+
+        DebugPosition("초기화 종료");
     }
     
 
     // 이동 모드 설정 함수
     private void SetupMovementMode()
     {
+        DebugPosition("셋 무브먼트 시작");
         // NavMeshAgent 모드 설정
         if (_moveMode == MovementMode.NavMeshAgent)
         {
@@ -220,6 +231,8 @@ _animator = GetComponentInChildren<Animator>();
                  SetupMovementMode(); // 설정 재귀 호출
             }
         }
+        
+        DebugPosition("셋 무브먼트 종료");
     }
 
     public void Bleed(Vector3 position, Vector3 direction)
@@ -233,17 +246,21 @@ _animator = GetComponentInChildren<Animator>();
 
     private void Update()
     {
-  
+        
+        DebugPosition("Update 시작");
 
         // 현재 상태에 따른 함수 호출
         switch (_currentState)
         {
             case EnemyState.Idle:
             {
+                DebugPosition("NavmeshSet 시작");
                 _agent.enabled = true;
                 _agent.isStopped = true;
+                DebugPosition("NavmeshSet 종료");
+                Idle();
                 
-                Idle(); 
+                
                 break;
             }
             case EnemyState.Patrol:
@@ -292,6 +309,7 @@ _animator = GetComponentInChildren<Animator>();
                 }
                 break;
         }
+        DebugPosition("Update 끝");
     }
 
    
@@ -368,7 +386,7 @@ _animator = GetComponentInChildren<Animator>();
 
     private void Idle()
     {
-
+        DebugPosition("Idle 시작");
         _idleTimer += Time.deltaTime;
 
         // 플레이어 탐지 시 Trace 상태로 전환
@@ -385,10 +403,12 @@ _animator = GetComponentInChildren<Animator>();
             _animator.SetTrigger("IdleToMove");
             ChangeState(EnemyState.Patrol);
         }
+        DebugPosition("Idle 종료");
     }
 
     private void Patrol()
     {
+        
         // 플레이어 탐지 시 Trace 상태로 전환
         if (Vector3.Distance(transform.position, _player.transform.position) < FindDistance)
         {
@@ -440,6 +460,7 @@ _animator = GetComponentInChildren<Animator>();
                 }
             }
         }
+        
     }
 
     private void Trace()
@@ -515,7 +536,7 @@ _animator = GetComponentInChildren<Animator>();
             {
                  _agent.stoppingDistance = 0.1f; // 복귀 시 도착 판정용 멈춤 거리
                  _agent.isStopped = false;
-                 _agent.SetDestination(_startPosition); // 시작 위치로 이동
+                 _agent.SetDestination(StartPosition); // 시작 위치로 이동
                  hasReturned = (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance);
             }
         }
@@ -523,10 +544,10 @@ _animator = GetComponentInChildren<Animator>();
         {
              if (_characterController != null && _characterController.enabled)
              {
-                 hasReturned = (Vector3.Distance(transform.position, _startPosition) <= 0.2f);
+                 hasReturned = (Vector3.Distance(transform.position, StartPosition) <= 0.2f);
                  if (!hasReturned)
                  {
-                     Vector3 dir = (_startPosition - transform.position).normalized;
+                     Vector3 dir = (StartPosition - transform.position).normalized;
                      _characterController.Move(dir * MoveSpeed * Time.deltaTime);
                      if(dir != Vector3.zero) transform.rotation = Quaternion.LookRotation(dir);
                  }
@@ -538,7 +559,7 @@ _animator = GetComponentInChildren<Animator>();
         {
             ChangeState(EnemyState.Idle);
             // 도착 시 위치/회전 보정
-            transform.position = _startPosition;
+            transform.position = StartPosition;
             transform.rotation = Quaternion.identity; // 또는 시작 시 회전값 저장 후 사용
             if (_moveMode == MovementMode.NavMeshAgent && _agent != null && _agent.enabled)
             {
