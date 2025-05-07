@@ -23,8 +23,7 @@ public class CameraRotate : MonoBehaviour
     private float _rotationX = 0;
     private float _rotationY = 0;
 
-    // 스크립트 컴포넌트가 활성화될 때마다 호출되는 함수입니다.
-    // 게임 오브젝트가 처음 활성화될 때, 그리고 비활성화되었다가 다시 활성화될 때 호출됩니다.
+    
     private void OnEnable()
     {
         // 카메라 회전 상태를 초기화하는 함수를 호출합니다.
@@ -38,10 +37,7 @@ public class CameraRotate : MonoBehaviour
         // 플레이어 Transform 참조가 Inspector에서 할당되었는지 확인합니다.
         if (PlayerTransform == null)
         {
-             // 할당되지 않았다면 경고 메시지를 출력하고,
-             // 카메라의 현재 각도를 기준으로 내부 변수를 초기화하거나 기본값을 사용합니다.
-             Debug.LogWarning("CameraRotate 스크립트에 PlayerTransform이 할당되지 않았습니다. 카메라의 현재 각도 또는 기본값으로 초기화합니다.");
-
+             
              // 현재 게임 오브젝트(카메라)의 월드 오일러 각도를 사용하여 내부 회전 변수를 초기화합니다.
              _rotationX = transform.eulerAngles.y; // 현재 카메라의 수평 각도
              _rotationY = transform.eulerAngles.x; // 현재 카메라의 수직 각도

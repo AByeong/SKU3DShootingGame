@@ -189,15 +189,14 @@ _animator = GetComponentInChildren<Animator>();
         }
         UIEnemy.Refresh_HPBar(_currentHealth);
 
-        DebugPosition("초기화 종료");
+
     }
     
 
     // 이동 모드 설정 함수
     private void SetupMovementMode()
     {
-        DebugPosition("셋 무브먼트 시작");
-        // NavMeshAgent 모드 설정
+
         if (_moveMode == MovementMode.NavMeshAgent)
         {
             if (_agent != null)
@@ -232,7 +231,7 @@ _animator = GetComponentInChildren<Animator>();
             }
         }
         
-        DebugPosition("셋 무브먼트 종료");
+
     }
 
     public void Bleed(Vector3 position, Vector3 direction)
@@ -247,17 +246,17 @@ _animator = GetComponentInChildren<Animator>();
     private void Update()
     {
         
-        DebugPosition("Update 시작");
+
 
         // 현재 상태에 따른 함수 호출
         switch (_currentState)
         {
             case EnemyState.Idle:
             {
-                DebugPosition("NavmeshSet 시작");
+
                 _agent.enabled = true;
                 _agent.isStopped = true;
-                DebugPosition("NavmeshSet 종료");
+
                 Idle();
                 
                 
@@ -309,7 +308,7 @@ _animator = GetComponentInChildren<Animator>();
                 }
                 break;
         }
-        DebugPosition("Update 끝");
+
     }
 
    
@@ -386,7 +385,7 @@ _animator = GetComponentInChildren<Animator>();
 
     private void Idle()
     {
-        DebugPosition("Idle 시작");
+
         _idleTimer += Time.deltaTime;
 
         // 플레이어 탐지 시 Trace 상태로 전환
@@ -403,7 +402,7 @@ _animator = GetComponentInChildren<Animator>();
             _animator.SetTrigger("IdleToMove");
             ChangeState(EnemyState.Patrol);
         }
-        DebugPosition("Idle 종료");
+
     }
 
     private void Patrol()

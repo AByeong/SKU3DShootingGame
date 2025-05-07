@@ -34,7 +34,7 @@ public class Barrel : MonoBehaviour, IDamagable
         Debug.Log("EXPLODE");
         Instantiate(ExplosionEffectPrefab,this.transform.position,Quaternion.identity);
         
-        Collider[] hitColliders = Physics.OverlapSphere(this.transform.position, _radius, ~LayerMask.NameToLayer("Barrel"));
+        Collider[] hitColliders = Physics.OverlapSphere(this.transform.position, _radius);
         //Collider[] hitDrumColliders = Physics.OverlapSphere(this.transform.position, _radius, (1 << 10));
         foreach (Collider victim in hitColliders)
         {

@@ -7,10 +7,10 @@ public class CameraManager : MonoBehaviour
     {
         FPS,
         TPS,
-        QuerterView // 참고: QuarterView 오타 가능성 (QuarterView)
+        QuerterView // Typo: Should ideally be QuarterView
     }
 
-    public CameraQuerterView QuerterView; // 참고: QuarterView 오타 가능성 (QuarterViewBehaviour)
+    public CameraQuerterView QuerterView;
     public CameraFollow CameraFollow;
     public CameraRotate CameraRotate;
     public CameraTPSMove CameraTPSMove;
@@ -39,7 +39,6 @@ public class CameraManager : MonoBehaviour
 
     private void Awake()
     {
-        // "Player" 레이어의 인덱스를 가져옵니다.
         _playerLayer = LayerMask.NameToLayer("Player");
         if (_playerLayer == -1)
         {
@@ -51,12 +50,12 @@ public class CameraManager : MonoBehaviour
             Camera = GetComponent<Camera>();
             if (Camera == null)
             {
-                Camera = Camera.main; // 최후의 수단으로 메인 카메라를 찾아봅니다.
+                Camera = Camera.main;
             }
             if (Camera == null)
             {
                 Debug.LogError("CameraManager: 카메라 컴포넌트를 찾을 수 없습니다. Camera 변수에 카메라를 할당해주세요.");
-                enabled = false; // 스크립트 비활성화
+                enabled = false;
                 return;
             }
         }
@@ -64,41 +63,50 @@ public class CameraManager : MonoBehaviour
 
     private void Start()
     {
-        if (Camera == null) return; // Awake에서 카메라를 못찾았으면 Start 실행 중지
-        FPS_State(); // 초기 상태 설정
+        if (Camera == null) return;
+        FPS_State();
     }
 
     private void Update()
     {
         if (Camera == null) return;
 
-        if (Input.GetKeyDown(KeyCode.Alpha8)) // FPS
+        if (Input.GetKeyDown(KeyCode.Alpha8))
         {
             FPS_State();
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha9)) // TPS
+        if (Input.GetKeyDown(KeyCode.Alpha9))
         {
             TPS_State();
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha0)) // QuarterView
+        if (Input.GetKeyDown(KeyCode.Alpha0))
         {
-            Querterview_State();
+            Querterview_State(); // Typo: Querterview_State
         }
     }
 
     private void FPS_State()
     {
         CameraView = CameraViewState.FPS;
-
         Camera.orthographic = false;
+
+        // --- START OF FIX ---
+        if (PlayerTransform != null)
+        {
+            // Reset Player's pitch and roll, preserving its current yaw (horizontal facing).
+            // This ensures PlayerTransform.forward is horizontal and aligns with CameraRotate's initialization.
+            float currentYaw = PlayerTransform.eulerAngles.y;
+            PlayerTransform.eulerAngles = new Vector3(0f, currentYaw, 0f);
+        }
+        // --- END OF FIX ---
+
         if (QuerterView != null) QuerterView.enabled = false;
-        if (CameraFollow != null) CameraFollow.enabled = true;
-        if (CameraRotate != null) CameraRotate.enabled = true;
+        if (CameraFollow != null) CameraFollow.enabled = true; // CameraFollow might attach the camera to PlayerTransform
+        if (CameraRotate != null) CameraRotate.enabled = true; // CameraRotate will now initialize using the 'cleaned' PlayerTransform rotation
         if (CameraTPSMove != null) CameraTPSMove.enabled = false;
 
-        // FPS 모드: Player 레이어 컬링 (보이지 않게)
         if (_playerLayer != -1)
         {
             Camera.cullingMask &= ~(1 << _playerLayer);
@@ -108,93 +116,84 @@ public class CameraManager : MonoBehaviour
     private void TPS_State()
     {
         CameraView = CameraViewState.TPS;
+        Camera.orthographic = false;
 
         if (PlayerTransform != null && CameraTPSMove != null)
         {
             CameraTPSMove.enabled = true;
             CameraTPSMove.Target = PlayerTransform;
 
-            Quaternion playerRotation = PlayerTransform.rotation;
+            Quaternion playerRotation = PlayerTransform.rotation; // Use current player rotation for TPS setup
             Vector3 initialOffset = playerRotation * new Vector3(0f, InitialTPSCameraHeight, -InitialTPSToPlayerDistance);
             Camera.transform.position = PlayerTransform.position + initialOffset;
-            Camera.transform.LookAt(PlayerTransform.position + Vector3.up * InitialTPSCameraHeight / 2f);
-
-            CameraTPSMove._rotationX = Camera.transform.eulerAngles.y - PlayerTransform.eulerAngles.y;
-            CameraTPSMove._rotationY = Camera.transform.eulerAngles.x;
-
-            Camera.orthographic = false;
-            if (QuerterView != null) QuerterView.enabled = false;
-            if (CameraFollow != null) CameraFollow.enabled = false;
-            if (CameraRotate != null) CameraRotate.enabled = false;
+            Camera.transform.LookAt(PlayerTransform.position + Vector3.up * InitialTPSCameraHeight / 2f); // Look slightly above player's feet
         }
         else
         {
             if (PlayerTransform == null) Debug.LogError("PlayerTransform이 CameraManager에 할당되지 않았습니다.");
             if (CameraTPSMove == null) Debug.LogError("CameraTPSMove가 CameraManager에 할당되지 않았습니다.");
-
-            Camera.orthographic = false;
-            if (QuerterView != null) QuerterView.enabled = false;
-            if (CameraFollow != null) CameraFollow.enabled = false;
-            if (CameraRotate != null) CameraRotate.enabled = false;
             if (CameraTPSMove != null) CameraTPSMove.enabled = true;
         }
 
-        // TPS 모드: Player 레이어 보이도록 설정
+        if (QuerterView != null) QuerterView.enabled = false;
+        if (CameraFollow != null) CameraFollow.enabled = false;
+        if (CameraRotate != null) CameraRotate.enabled = false;
+
         if (_playerLayer != -1)
         {
             Camera.cullingMask |= (1 << _playerLayer);
         }
     }
 
-    private void Querterview_State() // 참고: 오타일 경우 QuarterViewState
+    // Typo: Querterview_State, consider renaming to QuarterViewState or QuarterView_State
+    private void Querterview_State()
     {
-        CameraView = CameraViewState.QuerterView;
+        CameraView = CameraViewState.QuerterView; // Typo: CameraViewState.QuerterView
+        Camera.orthographic = true;
 
         if (QuerterView != null) QuerterView.enabled = true;
         if (CameraFollow != null) CameraFollow.enabled = false;
         if (CameraRotate != null) CameraRotate.enabled = false;
         if (CameraTPSMove != null) CameraTPSMove.enabled = false;
-        // 참고: 필요하다면 여기서 Camera.orthographic = true; 설정 (쿼터뷰 카메라 스크립트에서 제어할 수도 있음)
 
-
-        // QuarterView 모드: Player 레이어 보이도록 설정
         if (_playerLayer != -1)
         {
             Camera.cullingMask |= (1 << _playerLayer);
         }
     }
 
-    public void ShakeCamera()
+    public void ShakeCamera(float duration, float strength)
     {
         if (Camera == null) return;
         switch (CameraView)
         {
-            case CameraViewState.QuerterView:
-                ShakeCameraRotation();
+            case CameraViewState.QuerterView: // Typo
+                ShakeCameraRotation(duration, Vector3.one*strength);
                 break;
             case CameraViewState.FPS:
             case CameraViewState.TPS:
-                ShakeCameraViewport();
+                ShakeCameraViewport(); // Consider if FPS should be FOV and TPS Viewport, or configurable
+                // ShakeCameraFOV(); // If you prefer FOV for FPS/TPS
                 break;
         }
     }
 
     public void ShakeCameraRotation(float durationOverride = -1f, Vector3 strengthOverride = default, float frequencyOverride = -1f)
     {
-        if (Camera == null || CameraView != CameraViewState.QuerterView) return;
+        if (Camera == null || CameraView != CameraViewState.QuerterView) return; // Typo
 
         float duration = (durationOverride > 0) ? durationOverride : QuarterViewShakeRotationDuration;
         Vector3 strength = (strengthOverride != default) ? strengthOverride : QuarterViewShakeRotationStrength;
         float frequency = (frequencyOverride >= 0) ? frequencyOverride : QuarterViewShakeRotationFrequency;
 
-        _quarterViewShakeRotationTweener?.Kill(); // 이전 트위너 Kill
+        _quarterViewShakeRotationTweener?.Kill();
         _quarterViewShakeRotationTweener = Camera.transform.DOShakeRotation(duration, strength, (int)frequency)
             .SetAutoKill(true);
     }
 
     public void ShakeCameraFOV(float durationOverride = -1f, float intensityOverride = -1f)
     {
-        if (Camera == null || CameraView == CameraViewState.QuerterView) return;
+        if (Camera == null || CameraView == CameraViewState.QuerterView || Camera.orthographic) return; // Typo & check for orthographic
 
         float duration = (durationOverride > 0) ? durationOverride : FOVShakeDuration;
         float intensity = (intensityOverride >= 0) ? intensityOverride : FOVShakeIntensity;
@@ -204,28 +203,29 @@ public class CameraManager : MonoBehaviour
 
         _fovShakeTweener?.Kill();
 
-        _fovShakeTweener = DOTween.Sequence(); // 새로운 시퀀스 생성
-        _fovShakeTweener.Append(Camera.DOFieldOfView(maxFOV, duration / 2f).SetEase(Ease.OutQuad));
-        _fovShakeTweener.Append(Camera.DOFieldOfView(minFOV, duration / 2f).SetEase(Ease.InQuad));
-        _fovShakeTweener.Append(Camera.DOFieldOfView(originalFOV, duration / 2f).SetEase(Ease.OutQuad));
+        _fovShakeTweener = DOTween.Sequence();
+        _fovShakeTweener.Append(Camera.DOFieldOfView(maxFOV, duration / 3f).SetEase(Ease.OutQuad)); // Adjusted timings slightly
+        _fovShakeTweener.Append(Camera.DOFieldOfView(minFOV, duration / 3f).SetEase(Ease.InOutQuad));
+        _fovShakeTweener.Append(Camera.DOFieldOfView(originalFOV, duration / 3f).SetEase(Ease.InQuad));
         _fovShakeTweener.Play().SetAutoKill(true);
     }
 
     public void ShakeCameraViewport(float durationOverride = -1f, float intensityOverride = -1f)
     {
-        if (Camera == null || CameraView == CameraViewState.QuerterView) return;
+        if (Camera == null || CameraView == CameraViewState.QuerterView) return; // Typo
 
         float duration = (durationOverride > 0) ? durationOverride : ViewportShakeDuration;
         float intensity = (intensityOverride >= 0) ? intensityOverride : ViewportShakeIntensity;
         Rect originalViewport = Camera.rect;
-        Vector2 randomOffset() => Random.insideUnitCircle * intensity;
+        // Corrected randomOffset to be a function for variety
+        Vector2 GetRandomOffset() => Random.insideUnitCircle * intensity;
 
         _viewportShakeTweener?.Kill();
 
-        _viewportShakeTweener = DOTween.Sequence(); // 새로운 시퀀스 생성
-        _viewportShakeTweener.Append(Camera.DORect(new Rect(originalViewport.x + randomOffset().x, originalViewport.y + randomOffset().y, originalViewport.width, originalViewport.height), duration / 4f).SetEase(Ease.OutQuad));
-        _viewportShakeTweener.Append(Camera.DORect(new Rect(originalViewport.x + randomOffset().x, originalViewport.y + randomOffset().y, originalViewport.width, originalViewport.height), duration / 4f).SetEase(Ease.InOutQuad));
-        _viewportShakeTweener.Append(Camera.DORect(new Rect(originalViewport.x + randomOffset().x, originalViewport.y + randomOffset().y, originalViewport.width, originalViewport.height), duration / 4f).SetEase(Ease.InOutQuad));
+        _viewportShakeTweener = DOTween.Sequence();
+        _viewportShakeTweener.Append(Camera.DORect(new Rect(originalViewport.x + GetRandomOffset().x, originalViewport.y + GetRandomOffset().y, originalViewport.width, originalViewport.height), duration / 4f).SetEase(Ease.OutQuad));
+        _viewportShakeTweener.Append(Camera.DORect(new Rect(originalViewport.x + GetRandomOffset().x, originalViewport.y + GetRandomOffset().y, originalViewport.width, originalViewport.height), duration / 4f).SetEase(Ease.InOutQuad));
+        _viewportShakeTweener.Append(Camera.DORect(new Rect(originalViewport.x + GetRandomOffset().x, originalViewport.y + GetRandomOffset().y, originalViewport.width, originalViewport.height), duration / 4f).SetEase(Ease.InOutQuad));
         _viewportShakeTweener.Append(Camera.DORect(originalViewport, duration / 4f).SetEase(Ease.InQuad));
         _viewportShakeTweener.Play().SetAutoKill(true);
     }

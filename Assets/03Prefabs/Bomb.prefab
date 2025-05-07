@@ -153,5 +153,6 @@ MonoBehaviour:
   ExplosionEffectPrefab: {fileID: 100004, guid: b46890100828db6429ff69c322b45893, type: 3}
   DecalProjectorPrefab: {fileID: 5133998788976646614, guid: 49900a563d8b17f4cb7161e18a47a20d, type: 3}
   DecalLifetime: 10
-  ExplosionDamage: 1
+  _radius: 5
+  ExplosionDamage: 30
   KnockbackPower: 10

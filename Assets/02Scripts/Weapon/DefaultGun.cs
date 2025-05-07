@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class DefaultGun : Weapon
 {
+    
+    public ParticleSystem Muzzle;
+    
     public override void Initialize()
     {
         CurrentAmmo = MaxBulletCount;
@@ -31,7 +34,7 @@ public class DefaultGun : Weapon
 
 
             if (Physics.Raycast(FirePosition.position, fireDirection, out damageHitInfo, MaxShotDistance, layerMask))
-            {
+            {Muzzle.Play();
                 // 실제 피격 지점을 이펙트 및 궤적 종료 지점으로 사용
                 targetPoint = damageHitInfo.point; // 목표 지점을 실제 피격 지점으로 업데이트
                 Damage damage = new Damage
@@ -39,7 +42,7 @@ public class DefaultGun : Weapon
                     Value = 10,
                     From = this.gameObject,
                     KnockBackPower = 1f,
-                    HitDirection = -fireDirection, // 적 *방향으로*의 벡터 (피격 방향)
+                    HitDirection = -fireDirection, 
                     HitTransform = targetPoint
                 };
 

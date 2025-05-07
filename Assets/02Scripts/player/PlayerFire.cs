@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class PlayerFire : MonoBehaviour
 {
+    
+    
     public Sprite[] WeaponIconImages;
     [SerializeField] private Image WeaponIcon;
     private Animator _animator;
@@ -116,28 +118,38 @@ public class PlayerFire : MonoBehaviour
 
     private void HandleShootingInput()
     {
-        // 발사 *가능* 상태인지 확인 (재장전 중 아님, 탄약 있음, 쿨타임 완료)
-        if (Input.GetMouseButton(0))
+
+        if (GameManager.Instance.CurrentState == GameManager.GameState.Play)
         {
-            // 발사 시 재장전 중지
 
-            if(!cursorInUI.InUIZone)
+
+            if (Input.GetMouseButton(0))
             {
-                if (_shotPossible)
-                {
-                    _animator.SetTrigger("Shot");
-                    _shotPossible = false;
-                }
 
+
+                if (!cursorInUI.InUIZone)
+                {
+                    if (_shotPossible)
+                    {
+
+                        _animator.SetTrigger("Shot");
+                        _shotPossible = false;
+                    }
+
+                }
             }
+
+
         }
-        
-       
     }
 
     public void Attack()
     {
         Debug.Log("Animation Attack!");
+        if (_weaponType == WeaponType.Gun)
+        {
+            CameraManager.ShakeCamera(0.1f, 1f);
+        }
         Weapon.Attack();
     }
 
