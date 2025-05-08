@@ -25,7 +25,7 @@ public class Bomb : MonoBehaviour
 
         {
 
-            cameraManager.ShakeCamera(1f, 10f);
+            cameraManager.ShakeCamera(0.5f, 5f);
 
 
             // 플레이어 태그가 아닌 오브젝트와 충돌했을 때만 폭발 처리

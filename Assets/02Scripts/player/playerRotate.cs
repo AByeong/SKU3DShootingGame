@@ -21,7 +21,7 @@ public class PlayerRotate : MonoBehaviour
         if (GameManager.Instance.CurrentState == GameManager.GameState.Play )
         {
             // 현재 활성화된 카메라 시점에 따라 회전 로직 분기 처리
-            switch (CameraManager.CameraView)
+            switch (CameraManager.CurrentCameraView)
             {
                 case CameraManager.CameraViewState.FPS:
                     HandleFPSRotation();

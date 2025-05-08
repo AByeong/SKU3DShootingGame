@@ -103,7 +103,7 @@ private Animator _animator;
 
     public void DebugPosition(string CheckPoint)
     {
-        Debug.Log($"{CheckPoint}시점의 {this.name}의 위치가 {this.transform.position}");
+//        Debug.Log($"{CheckPoint}시점의 {this.name}의 위치가 {this.transform.position}");
     }
 
 
@@ -357,7 +357,7 @@ _animator = GetComponentInChildren<Animator>();
     {
         if (_currentState == newState) return; // 같은 상태로 변경 방지
 
-        Debug.Log($"{gameObject.name}: {_currentState} -> {newState}");
+//        Debug.Log($"{gameObject.name}: {_currentState} -> {newState}");
         _currentState = newState;
 
         // 상태 변경 시 필요한 초기화 로직 

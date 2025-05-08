@@ -60,7 +60,7 @@ public abstract class Weapon : MonoBehaviour
         bool hitDetected = false; // 충돌 감지 여부
         RaycastHit hitInfo; // 충돌 정보
 
-        switch (CameraManager.CameraView)
+        switch (CameraManager.CurrentCameraView)
         {
             case CameraManager.CameraViewState.FPS:
             case CameraManager.CameraViewState.TPS:

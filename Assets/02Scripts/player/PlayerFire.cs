@@ -343,7 +343,7 @@ public class PlayerFire : MonoBehaviour
         bool hitDetected = false; // 충돌 감지 여부
         RaycastHit hitInfo; // 충돌 정보
 
-        switch (CameraManager.CameraView)
+        switch (CameraManager.CurrentCameraView)
         {
             case CameraManager.CameraViewState.FPS:
 

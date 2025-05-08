@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlayerDataSO
   m_EditorClassIdentifier: 
   BasicSpeed: 10
-  DashSpeed: 20
+  DashSpeed: 30
   MaxStamina: 100
   NeedStamina2Roll: 10
   NormalStamina: 15
@@ -22,4 +22,4 @@ MonoBehaviour:
   RollStamina: -10
   RollPower: 5
   MaxHealth: 100
-  JumpPower: 5
+  JumpPower: 50

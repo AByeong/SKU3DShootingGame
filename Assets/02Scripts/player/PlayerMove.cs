@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
-using Unity.VisualScripting; // 만약 Visual Scripting을 사용하지 않는다면 이 줄은 삭제해도 됩니다.
 using UnityEngine;
-using UnityEngine.Serialization; // 만약 FormerlySerializedAs 등을 사용하지 않는다면 이 줄은 삭제해도 됩니다.
-using UnityEngine.UI; // 만약 UI 요소를 코드에서 직접 제어하지 않는다면 이 줄은 삭제해도 됩니다.
+using UnityEngine.Serialization; // FormerlySerializedAs 등 사용 시
+// using Unity.VisualScripting; // Visual Scripting 사용 시
+// using UnityEngine.UI; // UI 요소 코드 제어 시
 
 public class PlayerMove : MonoBehaviour
 {
@@ -17,12 +17,12 @@ public class PlayerMove : MonoBehaviour
 
     private CharacterController _characterController;
 
-    private const float GRAVITY = -9.8f; //중력가속도
-    private float _yVelocity = 0f; //속도
+    private const float GRAVITY = -9.8f * 6f;
+    private float _yVelocity = 0f;
 
     public float JumpPower = 10f;
     private int _jumpingCount = 0;
-    public int MaxJumpCount = 2; // ★★★ 2단 점프를 위한 최대 점프 횟수 추가 ★★★
+    public int MaxJumpCount = 2;
 
     [SerializeField]
     private float _stamina;
@@ -33,11 +33,12 @@ public class PlayerMove : MonoBehaviour
     private float _needStamina2Roll = 10f;
 
     [SerializeField]
-    private float _rollingPower = 1f;
+    private float _rollingPower = 1f; // 현재 구르기 힘/속도 (감소하는 값)
+    private float _baseRollPowerFromCore = 5f; // PlayerCore에서 가져온 구르기 기본 힘/속도
+
     [SerializeField]
     private bool _isWall = false;
-    [SerializeField]
-    private bool _isGrounded = true; // 이 변수는 Jump()에서 사용되지만, CharacterController.isGrounded를 직접 사용하는 것이 더 일반적입니다.
+    // [SerializeField] private bool _isGrounded = true; // CharacterController.isGrounded를 직접 사용
     [SerializeField]
     private bool _isRunning = false;
 
@@ -45,12 +46,24 @@ public class PlayerMove : MonoBehaviour
     private float _wallStamina = -10f;
     private float _runningStamina = -10f;
 
-    private float _rollPower = 5f;
+    // CameraManager 참조
+    public CameraManager cameraManager;
+    public float RotationSpeed = 10f; // 캐릭터 회전 속도
 
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
         _animator = GetComponentInChildren<Animator>();
+
+        // CameraManager 찾기 (Inspector에서 할당되지 않은 경우)
+        if (cameraManager == null)
+        {
+            cameraManager = FindObjectOfType<CameraManager>();
+        }
+        if (cameraManager == null)
+        {
+            Debug.LogError("PlayerMove: CameraManager를 찾을 수 없습니다. 카메라 시점별 이동이 올바르게 동작하지 않을 수 있습니다.");
+        }
     }
 
     private void Start()
@@ -64,27 +77,28 @@ public class PlayerMove : MonoBehaviour
             _normalStamina = playerCore.NormalStamina;
             _wallStamina = playerCore.WallStamina;
             _runningStamina = playerCore.RunningStamina;
-            _rollPower = playerCore.RollPower;
+            _baseRollPowerFromCore = playerCore.RollPower; // PlayerCore에서 RollPower를 가져와 _baseRollPowerFromCore에 저장
             JumpPower = playerCore.JumpPower;
-            // MaxJumpCount도 PlayerCore에서 가져오도록 설정할 수 있습니다.
-            // 예: if (playerCore.MaxJumpCount > 0) MaxJumpCount = playerCore.MaxJumpCount;
+            // RotationSpeed = playerCore.RotationSpeed; // PlayerCore에 RotationSpeed가 있다면 가져옵니다.
         }
         else
         {
             Debug.LogError("PlayerCore가 PlayerMove 스크립트에 할당되지 않았습니다. 기본값을 사용합니다.");
+            _baseRollPowerFromCore = 5f; // PlayerCore 없을 시 기본값
         }
         _moveSpeed = BasicSpeed;
         _stamina = MaxStamina;
-        _yVelocity = GRAVITY;
+        // _yVelocity = GRAVITY; // 시작 시 바로 중력 적용보다는 isGrounded 상태에 따라 결정되는 것이 좋음
+        _yVelocity = -2.0f; // CharacterController의 일반적인 초기값
     }
 
     private void Update()
     {
         if (GameManager.Instance.CurrentState == GameManager.GameState.Play)
         {
-            BasicCharacterMovement();
+            HandleMovement(); // BasicCharacterMovement 대신 새로운 통합 함수 호출
             Run();
-            Jump(); 
+            Jump();
             Rolling();
             SetGravity();
             Stamina();
@@ -92,16 +106,16 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
-    public void ShakeCamera()
-    {
-        // 내용 없음
-    }
+    
 
     private void SetGravity()
     {
         if (_isWall && _stamina > 0)
         {
-            _yVelocity = 1;
+            
+           // _yVelocity += GRAVITY * Time.deltaTime * 0.1f; // 중력 영향 감소
+            //if (_yVelocity > 2.0f) _yVelocity = 2.0f; // 너무 빠르게 떨어지지 않도록
+            _yVelocity = _moveSpeed;
         }
         else
         {
@@ -109,7 +123,7 @@ public class PlayerMove : MonoBehaviour
             {
                 if (_yVelocity < 0.0f)
                 {
-                    _yVelocity = -2.0f;
+                    _yVelocity = -2.0f; // 땅에 닿아있을 때 안정적인 Y 속도 (CharacterController 권장사항)
                 }
             }
             else
@@ -121,16 +135,18 @@ public class PlayerMove : MonoBehaviour
 
     private void CheckOnWall()
     {
-        if (_characterController.collisionFlags == CollisionFlags.Sides)
+        
+        if (!_characterController.isGrounded && (_characterController.collisionFlags & CollisionFlags.Sides) != 0)
         {
             _isWall = true;
-            _staminaNumber = _wallStamina;
+            _staminaNumber = _wallStamina; 
         }
         else
         {
-            if (_isWall)
+            if (_isWall) // 벽에서 떨어진 경우
             {
                 _isWall = false;
+
             }
         }
     }
@@ -139,104 +155,193 @@ public class PlayerMove : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (_stamina >= _needStamina2Roll)
+            if (_stamina >= _needStamina2Roll && !_isWall) // 벽에서는 구르기 방지
             {
-                _rollingPower = _rollPower;
+                _rollingPower = _baseRollPowerFromCore; // 구르기 시작 시 PlayerCore에서 설정된 값으로 초기화
                 _stamina -= _needStamina2Roll;
-                // _animator.SetTrigger("Roll"); // 원래 코드에 없었으므로 생략
+                _animator.SetTrigger("Roll"); // 구르기 애니메이션 트리거
             }
         }
 
-        if (_rollingPower > 1f)
+        // _rollingPower는 구르기 지속 시간 동안 점차 감소하거나, 구르기 상태를 나타내는 플래그로 사용될 수 있습니다.
+        // 여기서는 구르기 시 일시적으로 이동 속도를 _baseRollPowerFromCore로 설정하고,
+        // _rollingPower를 구르기 상태 및 감쇠 효과로 사용합니다 (기존 로직 유지).
+        if (_rollingPower > 1f) 
         {
-            _rollingPower -= Time.deltaTime * _rollPower;
-            if (_rollingPower < 1) _rollingPower = 1;
-        }
-    }
-
-
-    private void Jump()
-    {
-        // _isGrounded = _characterController.isGrounded; // 이 줄은 _characterController.isGrounded를 직접 사용하는 것이 좋습니다.
-
-        if (Input.GetButtonDown("Jump"))
-        {
-            if (_characterController.isGrounded) // 1. 땅에 있을 때 (1단 점프)
-            {
-                _animator.SetTrigger("Jump");
-                _yVelocity = JumpPower;
-                _jumpingCount = 1; // 점프 횟수를 1로 설정 (첫 번째 점프)
-            }
-            else if (_jumpingCount < MaxJumpCount) // 2. 공중에 있고, 아직 최대 점프 횟수에 도달하지 않았을 때 (2단 점프 이상)
-            {
-                _animator.SetTrigger("Jump"); // 2단 점프에도 동일한 애니메이션 또는 다른 애니메이션 사용 가능
-                _yVelocity = JumpPower * 0.9f; // 2단 점프는 약간 낮게 하거나 동일하게 (선택 사항)
-                _jumpingCount++; // 점프 횟수 증가
-            }
+            
+            _rollingPower -= Time.deltaTime * _baseRollPowerFromCore; // 감소율은 _baseRollPowerFromCore에 비례하게
+            if (_rollingPower < 1f) _rollingPower = 1f;
         }
         else
         {
-            // 기존 else 로직 유지 (애니메이션 관련하여 추후 검토 필요)
-            // if (!Input.GetButton("Jump") && _characterController.isGrounded) // 이렇게 조건을 더 명확히 할 수 있음
-            // {
-            //    _animator.SetTrigger("Ground");
-            // }
-            _animator.SetTrigger("Ground"); // 사용자의 기존 코드 유지
+            _rollingPower = 1f; // 구르기가 아닐 때는 1로 유지
         }
+    }
+
+    private void Jump()
+    {
+        if (Input.GetButtonDown("Jump") && !_isWall) // 벽에서는 점프 방식이 달라질 수 있음 (월점프 등)
+        {
+            if (_characterController.isGrounded)
+            {
+                _animator.SetTrigger("Jump");
+                _yVelocity = JumpPower;
+                _jumpingCount = 1;
+                _isWall = false; // 점프 시 벽 상태 해제
+            }
+            else if (_jumpingCount < MaxJumpCount)
+            {
+                _animator.SetTrigger("Jump");
+                _yVelocity = JumpPower * 0.9f; // 2단 점프는 약간 낮게
+                _jumpingCount++;
+                _isWall = false; // 점프 시 벽 상태 해제
+            }
+        }
+        // 기존 `_animator.SetTrigger("Ground");`는 매 프레임 호출될 수 있어 부적절합니다.
+        // 착지 애니메이션은 isGrounded 상태 변화를 감지하여 처리하는 것이 좋습니다.
+        // 예: if (!_wasGroundedLastFrame && _characterController.isGrounded) _animator.SetTrigger("Landed");
     }
 
     private void Run()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift))
+        // 쉬프트 키 입력 감지
+        bool isShiftPressed = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+        if (isShiftPressed && !_isWall && _stamina > 0) // 달리기 조건: 쉬프트 누름, 벽 아님, 스테미나 있음
         {
-            if (!_isWall)
+            if (!_isRunning) // 달리기를 시작하는 순간
             {
-                _staminaNumber = _runningStamina;
-                _moveSpeed = DashSpeed;
+                 _moveSpeed = DashSpeed;
                 _isRunning = true;
+                _staminaNumber = _runningStamina; // 달리기 중 스테미나 소모율
             }
         }
-
-        if (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift))
+        else // 쉬프트를 뗐거나, 벽에 있거나, 스테미나가 없을 때
         {
-            if (!_isWall)
+            if (_isRunning) // 달리기를 멈추는 순간
             {
                 _moveSpeed = BasicSpeed;
                 _isRunning = false;
+                // 스테미나 회복률은 Stamina()에서 기본 상태일 때 _normalStamina로 설정됨
             }
         }
-    }
-    private void Stamina()
-    {
-        _stamina += _staminaNumber * Time.deltaTime;
-        _stamina = Mathf.Clamp(_stamina, 0, MaxStamina);
-
-        if (_characterController.isGrounded && !_isWall && !_isRunning) // _isGrounded 대신 _characterController.isGrounded 사용 권장
+        if (_isRunning && _stamina <=0) // 달리는 중 스테미나 오링
         {
-            _staminaNumber = _normalStamina;
+            _moveSpeed = BasicSpeed;
+            _isRunning = false;
         }
     }
 
-    private void BasicCharacterMovement()
+    private void Stamina()
+    {
+        // 현재 상태에 따른 스테미나 변경률(_staminaNumber) 설정
+        if (_isWall && _stamina > 0) // 벽에 붙어있을 때
+        {
+            _staminaNumber = _wallStamina;
+        }
+        else if (_isRunning && _stamina > 0) // 달리는 중일 때
+        {
+            _staminaNumber = _runningStamina;
+        }
+        else if (_characterController.isGrounded) // 땅에 있고, 벽도 아니고, 달리는 중도 아닐 때 (기본 회복 상태)
+        {
+             _staminaNumber = _normalStamina;
+        }
+        else // 공중에 있지만 벽이 아닐 때 (스테미나 변화 없음 또는 약간 소모 - 선택)
+        {
+            _staminaNumber = 0; // 공중에서는 스테미나 변화 없음 (또는 약간 소모하도록 설정 가능)
+        }
+
+
+        _stamina += _staminaNumber * Time.deltaTime;
+        _stamina = Mathf.Clamp(_stamina, 0, MaxStamina);
+    }
+
+    private void HandleMovement()
     {
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
-        Vector3 dir = new Vector3(h, 0, v);
-        _animator.SetFloat("MoveAmount", dir.magnitude);
-        dir.Normalize();
+        Vector3 inputDirection = new Vector3(h, 0, v);
+        _animator.SetFloat("MoveAmount", Mathf.Clamp01(inputDirection.magnitude));
 
-        //dir.z += _rollingPower;
-        dir *= _rollingPower;
-        dir = Camera.main.transform.TransformDirection(dir);
+        Vector3 worldMoveDirection = Vector3.zero; // 최종 이동 방향 (월드 좌표계)
 
-        if (_characterController.isGrounded && _yVelocity <= 0.0f)
+        if (cameraManager != null)
         {
-            _jumpingCount = 0; // 땅에 착지 시 점프 카운트 초기화
+            switch (cameraManager.CurrentCameraView)
+            {
+                case CameraManager.CameraViewState.FPS:
+                    worldMoveDirection = transform.TransformDirection(inputDirection.normalized);
+                    break;
+
+                case CameraManager.CameraViewState.TPS:
+                    if (inputDirection.magnitude >= 0.1f)
+                    {
+                        Quaternion cameraYRotation = Quaternion.Euler(0f, Camera.main.transform.eulerAngles.y, 0f);
+                        worldMoveDirection = cameraYRotation * inputDirection.normalized;
+                        Quaternion targetRotation = Quaternion.LookRotation(worldMoveDirection);
+                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
+                    }
+                    break;
+
+                case CameraManager.CameraViewState.QuerterView: // CameraManager의 오타와 일치시킴
+                    if (inputDirection.magnitude >= 0.1f)
+                    {
+                        Quaternion cameraYRotation = Quaternion.Euler(0f, Camera.main.transform.eulerAngles.y, 0f);
+                        worldMoveDirection = cameraYRotation * inputDirection.normalized;
+                        Quaternion targetRotation = Quaternion.LookRotation(worldMoveDirection);
+                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
+                    }
+                    break;
+
+                default:
+                    if (inputDirection.magnitude >= 0.1f)
+                    {
+                        Quaternion cameraYRotation = Quaternion.Euler(0f, Camera.main.transform.eulerAngles.y, 0f);
+                        worldMoveDirection = cameraYRotation * inputDirection.normalized;
+                        Quaternion targetRotation = Quaternion.LookRotation(worldMoveDirection);
+                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
+                    }
+                    break;
+            }
+        }
+        else 
+        {
+            if (inputDirection.magnitude >= 0.1f)
+            {
+                worldMoveDirection = Camera.main != null ? Camera.main.transform.TransformDirection(inputDirection.normalized) : inputDirection.normalized;
+                worldMoveDirection.y = 0;
+                if(worldMoveDirection.sqrMagnitude > 0.01f)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(worldMoveDirection);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
+                }
+            }
         }
 
-        dir.y = _yVelocity;
+        if (_characterController.isGrounded)
+        {
+            _jumpingCount = 0;
+        }
 
-        _characterController.Move(dir * Time.deltaTime * _moveSpeed);
+
+        // 1. 기본 이동 속도(_moveSpeed)를 기반으로 수평 속도 계산
+        Vector3 finalHorizontalVelocity = worldMoveDirection * _moveSpeed;
+
+        // 2. 구르기 상태(_rollingPower > 1f)일 경우, 이 수평 속도에 _rollingPower 배율 적용
+        if (_rollingPower > 1f && worldMoveDirection.sqrMagnitude > 0.01f)
+        {
+            // _rollingPower는 _baseRollPowerFromCore에서 시작하여 1로 감소하는 배율.
+            // 예: _moveSpeed가 10이고, _rollingPower가 (초기값) 3이라면, 수평 속도는 30으로 시작.
+            finalHorizontalVelocity.x *= _rollingPower;
+            finalHorizontalVelocity.z *= _rollingPower;
+        }
+
+
+        Vector3 finalVelocity = finalHorizontalVelocity; // x, z 성분은 위에서 결정됨
+        finalVelocity.y = _yVelocity; // y축 속도(중력, 점프) 적용
+
+        _characterController.Move(finalVelocity * Time.deltaTime);
     }
 }
