@@ -9,7 +9,7 @@ public class Knife : Weapon
 
     private Vector3 lastFireCenter;
     private Vector3 lastFireForward;
-
+    [SerializeField] private float _closeDistance = 1.5f;
 
     public override void Initialize()
     {
@@ -33,7 +33,7 @@ public class Knife : Weapon
                 float angleToTarget = Vector3.Angle(forward, dirToTarget);
                 float distanceToTarget = Vector3.Distance(center, collider.transform.position);
 
-                bool isClose = distanceToTarget < 1.5f; // 너무 가까운 적 판정 거리 (원하면 숫자 조정 가능)
+                bool isClose = distanceToTarget < _closeDistance; // 너무 가까운 적 판정 거리 
 
                 if (isClose || angleToTarget <= DamageAngle / 2f)
                 {

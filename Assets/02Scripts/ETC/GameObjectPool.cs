@@ -1,121 +1,99 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Serialization;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
-// T 타입의 컴포넌트를 가진 게임 오브젝트를 풀링하는 제네릭 클래스
-// T는 반드시 Component를 상속받아야 함 
 public class GenericObjectPool<T> : MonoBehaviour where T : Component
 {
-    [FormerlySerializedAs("_prefab")]
-    [Header("풀링 설정")]
-    [Tooltip("풀링할 오브젝트의 프리팹 (T 타입 컴포넌트 포함)")]
-    [SerializeField] public T Prefab; // 풀링할 원본 프리팹 (T 타입 컴포넌트가 있어야 함)
-    [SerializeField] public bool SetParaent = false;
-    [Tooltip("초기 풀 크기")]
-    [SerializeField] private int _initialPoolSize = 10; // 처음에 생성해 둘 오브젝트 개수
+    [Header("Addressable 프리팹 참조")]
+    public AssetReferenceT<GameObject> PrefabReference;
 
-    [Tooltip("풀이 비었을 때 동적으로 생성 허용 여부")]
-    [SerializeField] private bool _allowGrowth = true; // 풀이 비었을 때 추가 생성 허용 여부
+    [SerializeField] private int _initialPoolSize = 10;
+    [SerializeField] private bool _allowGrowth = true;
 
-    // 사용 가능한(비활성) 오브젝트를 저장하는 큐(Queue)
-    private Queue<T> _pooledObjects = new Queue<T>();
-    
-    private void Awake()
+    private readonly Queue<T> _pooledObjects = new Queue<T>();
+
+    private void Start()
     {
-        // 프리팹이 할당되었는지 확인
-        if (Prefab == null)
+        if (PrefabReference == null)
         {
-            Debug.LogError($"[{typeof(T).Name} Pool] 프리팹이 할당되지 않았습니다!");
-            enabled = false; // 오류 발생 시 스크립트 비활성화
+            Debug.LogError($"[{typeof(T).Name} Pool] Addressable 프리팹이 설정되지 않았습니다.");
+            enabled = false;
             return;
         }
 
-        InitializePool(); // 풀 초기화 함수 호출
+        _ = InitializePoolAsync();
     }
 
-    // 풀을 초기화하는 함수
-    private void InitializePool()
+    private async Task InitializePoolAsync()
     {
         for (int i = 0; i < _initialPoolSize; i++)
         {
-            CreateNewObject(false); // 비활성 상태로 새 오브젝트 생성 및 풀에 추가
+            var instance = await CreateNewObjectAsync(false);
+            if (instance != null)
+                _pooledObjects.Enqueue(instance);
         }
     }
 
-    // 새로운 오브젝트를 생성하고 풀에 추가하는 도우미 함수
-    private T CreateNewObject(bool activate = true)
+    private async Task<T> CreateNewObjectAsync(bool activate = true)
     {
-        // 프리팹으로부터 새 게임 오브젝트 인스턴스 생성
-        T newInstance = Instantiate(Prefab);
+        var handle = PrefabReference.InstantiateAsync(transform);
+        await handle.Task;
 
-        // 생성된 인스턴스가 T 타입 컴포넌트를 가지고 있는지 확인 (Instantiate는 원본 프리팹과 동일한 컴포넌트를 보장함)
-        if (newInstance == null)
+        if (handle.Status == AsyncOperationStatus.Succeeded)
         {
-            Debug.LogError($"[{typeof(T).Name} Pool] 프리팹 '{Prefab.name}'에서 컴포넌트 '{typeof(T).Name}'을 찾을 수 없습니다!", Prefab);
-            return null; // 오류 시 null 반환
-        }
+            GameObject obj = handle.Result;
+            T component = obj.GetComponent<T>();
 
-        // 생성된 오브젝트를 풀 관리자(이 게임 오브젝트)의 자식으로 넣어 Hierarchy 정리 (선택 사항)
-        if(SetParaent)
-        newInstance.transform.SetParent(this.transform);
+            if (component == null)
+            {
+                Debug.LogError($"[{typeof(T).Name} Pool] 프리팹에서 {typeof(T).Name} 컴포넌트를 찾을 수 없습니다!");
+                Addressables.ReleaseInstance(obj);
+                return null;
+            }
 
-        // 기본적으로 비활성화 상태로 만들고 풀에 추가
-        newInstance.gameObject.SetActive(activate);
-        if (!activate)
-        {
-             _pooledObjects.Enqueue(newInstance); // 비활성화 상태면 큐에 바로 추가
-        }
+            obj.SetActive(activate);
+            if (!activate)
+                _pooledObjects.Enqueue(component);
 
-        return newInstance; // 생성된 인스턴스 반환
-    }
-
-    /// <summary>
-    /// 풀에서 사용 가능한 오브젝트를 가져옵니다. 없으면 새로 생성할 수 있습니다.
-    /// </summary>
-    
-    public T GetPooledObject()
-    {
-        // 풀(큐)에 사용 가능한 오브젝트가 있는지 확인
-        if (_pooledObjects.Count > 0)
-        {
-            // 큐에서 하나를 꺼냄 (Dequeue)
-            T instance = _pooledObjects.Dequeue();
-            // 오브젝트를 활성화
-            instance.gameObject.SetActive(true);
-            // 활성화된 인스턴스 반환
-            return instance;
+            return component;
         }
-        // 풀이 비어있는 경우
-        else if (_allowGrowth)
-        {
-            // 동적 생성이 허용되면 새 오브젝트를 '활성화된 상태'로 생성하고 바로 반환
-            Debug.Log($"[{typeof(T).Name} Pool] 풀이 비어 새 오브젝트를 동적으로 생성합니다.");
-            return CreateNewObject(true);
-        }
-        // 동적 생성이 허용되지 않으면 null 반환 (또는 오류 처리)
         else
         {
-            //Debug.Log($"[{typeof(T).Name} Pool] 풀이 비었고 동적 생성이 허용되지 않았습니다!");
+            Debug.LogError($"[{typeof(T).Name} Pool] Addressable 로드 실패: {PrefabReference.RuntimeKey}");
             return null;
         }
     }
 
-    /// <summary>
-    /// 사용이 끝난 오브젝트를 풀에 반환합니다.
-    /// </summary>
+    public async Task<T> GetPooledObjectAsync()
+    {
+        if (_pooledObjects.Count > 0)
+        {
+            var instance = _pooledObjects.Dequeue();
+            instance.gameObject.SetActive(true);
+            return instance;
+        }
+        else if (_allowGrowth)
+        {
+            return await CreateNewObjectAsync(true);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     public void ReturnPooledObject(T instance)
     {
-        // 반환하려는 인스턴스가 유효한지 확인
-        if (instance == null)
-        {
-            Debug.LogWarning($"[{typeof(T).Name} Pool] Null 인스턴스를 반환하려고 시도했습니다.");
-            return;
-        }
-
-        // 오브젝트를 비활성화
+        if (instance == null) return;
         instance.gameObject.SetActive(false);
-
-        // 풀(큐)에 다시 추가
         _pooledObjects.Enqueue(instance);
+    }
+
+    public void ReleaseObject(T instance)
+    {
+        if (instance != null)
+            Addressables.ReleaseInstance(instance.gameObject);
     }
 }

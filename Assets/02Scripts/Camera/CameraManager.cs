@@ -115,7 +115,7 @@ public class CameraManager : MonoBehaviour
 
         CurrentCameraView = newState;
 
-        DisableAllCameraScripts();
+        //DisableAllCameraScripts();
         KillShakeTweens();
 
         switch (CurrentCameraView)

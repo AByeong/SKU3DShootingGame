@@ -1,107 +1,154 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
- // using System;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
- // 제공된 GenericObjectPool<Enemy>를 상속받습니다.
- public class EnemyPool : GenericObjectPool<Enemy>
- {
-     [Header("Enemy 스폰 특정 설정")]
-     public Transform SpawnPoint;
-     [Tooltip("순찰 지점 (월드 좌표 사용 가정)")]
-     public PatrolPoints PatrolPoints;
+public class EnemyPool : MonoBehaviour
+{
+    [Header("Addressable 프리팹 참조")]
+    public AssetReferenceT<GameObject> EnemyPrefab;
+
+    [Header("Enemy 스폰 특정 설정")]
+    public Transform SpawnPoint;
+    [Tooltip("순찰 지점 (월드 좌표 사용 가정)")]
+    public PatrolPoints PatrolPoints;
     
-     [Tooltip("스폰 활성화 여부")]
-     public bool SpawnSwitch = true;
+    [Tooltip("스폰 활성화 여부")]
+    public bool SpawnSwitch = true;
 
-     [Header("Enemy 스폰 파라미터")]
-     [Tooltip("적 스폰 간격 (초)")]
-     public float SpawnInterval = 2f;
-     [Tooltip("스포너 기준 스폰 반경")]
-     public float Radius = 5f;
+    [Header("Enemy 스폰 파라미터")]
+    public float SpawnInterval = 2f;
+    public float Radius = 5f;
 
-     // 타이머 변수
-     private float _timer = 0f;
+    private float _timer = 0f;
 
-     // --- Unity Lifecycle Methods ---
+    // 풀링된 객체들
+    private readonly Queue<Enemy> _enemyPool = new();
 
-     private void Update()
-     {
-         // GameManager 인스턴스 존재 및 게임 상태 확인 (GameManager가 있다고 가정)
-         // 현재 날짜: 2025년 5월 6일
-         if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameManager.GameState.Play && SpawnSwitch)
-         {
-             _timer += Time.deltaTime;
+    [Tooltip("초기 생성할 적 수")]
+    public int InitialSize = 10;
 
-             if (_timer >= SpawnInterval)
-             {
-                 SpawnEnemy();
-                 _timer = 0f;
-             }
-         }
-         else
-         {
-             _timer = 0f;
-         }
-     }
+    [Tooltip("풀 크기 초과 시 생성 허용 여부")]
+    public bool AllowGrowth = true;
 
-     // --- Public Methods ---
+    private async void Start()
+    {
+        await InitializePoolAsync();
+    }
 
-     /// <summary>
-     /// 풀에서 사용 가능한 Enemy 오브젝트를 가져옵니다. (외부 호출용 래퍼 함수)
-     /// 다른 스크립트와의 호환성을 위해 유지합니다.
-     /// </summary>
-     /// <returns>활성화된 Enemy 인스턴스 또는 null</returns>
-     public Enemy GetObjectFromPool()
-     {
-         // 내부적으로는 베이스 클래스의 GetPooledObject를 호출합니다.
-         return GetPooledObject();
-     }
+    private async Task InitializePoolAsync()
+    {
+        for (int i = 0; i < InitialSize; i++)
+        {
+            var enemy = await CreateNewEnemyAsync(false);
+            if (enemy != null)
+                _enemyPool.Enqueue(enemy);
+        }
+    }
 
-     /// <summary>
-     /// 사용이 끝난 Enemy 오브젝트를 풀에 반환합니다. (원래 이름 유지)
-     /// </summary>
-     /// <param name="enemy">반환할 Enemy 인스턴스</param>
-     public void EnemyDie(Enemy enemy) // 요청하신대로 원래 메소드 이름 사용
-     {
-         // 베이스 클래스의 ReturnPooledObject 호출
-         ReturnPooledObject(enemy);
-     }
+    private void Update()
+    {
+        if (GameManager.Instance != null &&
+            GameManager.Instance.CurrentState == GameManager.GameState.Play &&
+            SpawnSwitch)
+        {
+            _timer += Time.deltaTime;
 
+            if (_timer >= SpawnInterval)
+            {
+                _ = SpawnEnemyAsync();
+                _timer = 0f;
+            }
+        }
+        else
+        {
+            _timer = 0f;
+        }
+    }
 
-     // --- Private Methods ---
+    // 외부에서 가져오기 위한 래퍼
+    public async Task<Enemy> GetObjectFromPool()
+    {
+        if (_enemyPool.Count > 0)
+        {
+            var enemy = _enemyPool.Dequeue();
+            enemy.gameObject.SetActive(true);
+            return enemy;
+        }
+        else if (AllowGrowth)
+        {
+            return await CreateNewEnemyAsync(true);
+        }
+        else
+        {
+            return null;
+        }
+    }
 
-     // 실제 적을 스폰하는 로직
-     private void SpawnEnemy()
-     {
-         // 베이스 클래스의 GetPooledObject()를 직접 호출합니다.
-         Enemy enemyInstance = GetPooledObject();
+    // 외부에서 반환하는 함수
+    public void EnemyDie(Enemy enemy)
+    {
+        if (enemy == null) return;
+        enemy.gameObject.SetActive(false);
+        _enemyPool.Enqueue(enemy);
+    }
 
-         if (enemyInstance != null)
-         {
-             
+    private async Task<Enemy> CreateNewEnemyAsync(bool activate = true)
+    {
+        var handle = EnemyPrefab.InstantiateAsync(transform);
+        await handle.Task;
 
-             // 3. 최종 스폰 위치 설정: 계산된 월드 좌표의 X, Z 값을 사용하고, Y 값은 1.1f로 고정
-             //Vector3 finalSpawnPosition = new Vector3(transform.position.x + Random.Range(0,Radius), 1.1f, transform.position.z+ Random.Range(0,Radius));
-             Vector3 finalSpawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            var obj = handle.Result;
+            var enemy = obj.GetComponent<Enemy>();
 
-             // 4. 부모 설정 해제 및 최종 위치/회전 적용
-             enemyInstance.transform.position = finalSpawnPosition;
-             enemyInstance.transform.rotation = Quaternion.identity;
+            if (enemy == null)
+            {
+                Debug.LogError("Enemy 컴포넌트를 찾을 수 없습니다.");
+                Addressables.ReleaseInstance(obj);
+                return null;
+            }
 
-             // 5. 월드 좌표를 사용하는 PatrolPoints 할당
-             enemyInstance.PatrolPoints = PatrolPoints;
-             
-             enemyInstance.name = this.name + "Enemy";
-             enemyInstance.StartPosition = finalSpawnPosition;
-             
-             enemyInstance.DebugPosition("소환된");
-             
-             enemyInstance.Initialize();
+            obj.SetActive(activate);
+            if (!activate)
+                obj.transform.SetParent(transform); // 풀에 보관
 
-             
-         }
-         else
-         {
-             Debug.LogWarning($"[{typeof(Enemy).Name} Pool] 사용 가능한 Enemy 인스턴스를 가져오지 못했습니다.");
-         }
-     }
- }
+            return enemy;
+        }
+        else
+        {
+            Debug.LogError($"Enemy Addressable 로드 실패: {EnemyPrefab.RuntimeKey}");
+            return null;
+        }
+    }
+
+    private async Task SpawnEnemyAsync()
+    {
+        var enemyInstance = await GetObjectFromPool();
+
+        if (enemyInstance != null)
+        {
+            Vector3 spawnPos = transform.position + new Vector3(
+                Random.Range(-Radius, Radius), 0f, Random.Range(-Radius, Radius)
+            );
+
+            spawnPos.y = 1.1f;
+
+            enemyInstance.transform.position = spawnPos;
+            enemyInstance.transform.rotation = Quaternion.identity;
+
+            enemyInstance.PatrolPoints = PatrolPoints;
+            enemyInstance.name = this.name + "_Enemy";
+            enemyInstance.StartPosition = spawnPos;
+
+            enemyInstance.DebugPosition("소환된");
+            enemyInstance.Initialize();
+        }
+        else
+        {
+            Debug.LogWarning("[EnemyPool] 사용 가능한 Enemy 인스턴스를 가져오지 못했습니다.");
+        }
+    }
+}

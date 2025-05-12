@@ -74,8 +74,8 @@ public class GameManager : MySingleton<GameManager>
     public void Restart()
     {
         
-        int currentScene = SceneManager.GetActiveScene().buildIndex;
-        SceneManager.LoadScene(currentScene);
+       // int currentScene = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(0);
     }
 
     public void Pause()

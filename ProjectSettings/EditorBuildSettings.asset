@@ -9,8 +9,15 @@ EditorBuildSettings:
     path: Assets/01Scenes/NinjaScene.unity
     guid: 1ca362ef87ed7994c96871945ff0824c
   - enabled: 1
+    path: Assets/01Scenes/LoginScene.unity
+    guid: 1bc94d87ad998504c9828fe9e5c102a9
+  - enabled: 0
+    path: Assets/01Scenes/LoadingScene.unity
+    guid: 1f9cd823ca38eab469529fbb196aba93
+  - enabled: 0
     path: Assets/01Scenes/OpenScene.unity
     guid: 9e7b54635e5867d4f9524b625beb066e
   m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: d423c9e11be1951489a9f3ea2b5a1d48, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

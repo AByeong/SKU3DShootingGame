@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Enemy Assets
+  m_EditorClassIdentifier: 
+  m_GroupName: Enemy Assets
+  m_GUID: dd3ae95f47cd6f34c9397d69fb3f40e7
+  m_SerializeEntries:
+  - m_GUID: f33d2ed7d96a9c646a994e5739d191e1
+    m_Address: Assets/03Prefabs/Enemy/Enemy.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 845d63cc7a558e6418b56af2a04addb2, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 0f469d7d4bfb069449f1d74fce59491d, type: 2}
+    - {fileID: 11400000, guid: c8c9cd47cc256344b9e04ee8cb86904a, type: 2}

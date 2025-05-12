@@ -485,6 +485,10 @@ PrefabInstance:
       value: NormalSpawner (1)
       objectReference: {fileID: 0}
     - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 3660086234459692033, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
+    - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
       propertyPath: PatrolPoints
       value: 
       objectReference: {fileID: 11400000, guid: dca59c61dd87eec4dbfba5b77c5364d1, type: 2}
@@ -4130,6 +4134,10 @@ PrefabInstance:
       value: NormalSpawner (3)
       objectReference: {fileID: 0}
     - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 3660086234459692033, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
+    - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
       propertyPath: PatrolPoints
       value: 
       objectReference: {fileID: 11400000, guid: dca59c61dd87eec4dbfba5b77c5364d1, type: 2}
@@ -6323,7 +6331,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &316671911
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9715,7 +9723,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 844.09, y: 487}
+  m_AnchoredPosition: {x: 0, y: -515}
   m_SizeDelta: {x: 724.4979, y: 246.4885}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &480147825
@@ -11023,6 +11031,10 @@ PrefabInstance:
       value: NormalSpawner (8)
       objectReference: {fileID: 0}
     - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 3660086234459692033, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
+    - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
       propertyPath: PatrolPoints
       value: 
       objectReference: {fileID: 11400000, guid: 2464a2d58d344d746b63fc9039349a46, type: 2}
@@ -11283,6 +11295,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NormalSpawner (6)
       objectReference: {fileID: 0}
+    - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 3660086234459692033, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
     - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
       propertyPath: PatrolPoints
       value: 
@@ -21147,6 +21163,10 @@ PrefabInstance:
       value: NormalSpawner (5)
       objectReference: {fileID: 0}
     - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 3660086234459692033, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
+    - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
       propertyPath: PatrolPoints
       value: 
       objectReference: {fileID: 11400000, guid: 04d9520d6368abc42a01011adf13f752, type: 2}
@@ -25540,6 +25560,10 @@ PrefabInstance:
       value: NormalSpawner (2)
       objectReference: {fileID: 0}
     - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 3660086234459692033, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
+    - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
       propertyPath: PatrolPoints
       value: 
       objectReference: {fileID: 11400000, guid: dca59c61dd87eec4dbfba5b77c5364d1, type: 2}
@@ -28915,7 +28939,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 1, b: 0.6274853, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -29783,6 +29807,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NormalSpawner (10)
       objectReference: {fileID: 0}
+    - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 3660086234459692033, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
     - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
       propertyPath: PatrolPoints
       value: 
@@ -37001,6 +37029,10 @@ PrefabInstance:
       value: NormalSpawner (7)
       objectReference: {fileID: 0}
     - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 3660086234459692033, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
+    - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
       propertyPath: PatrolPoints
       value: 
       objectReference: {fileID: 11400000, guid: 2464a2d58d344d746b63fc9039349a46, type: 2}
@@ -37581,6 +37613,10 @@ PrefabInstance:
       value: NormalSpawner (9)
       objectReference: {fileID: 0}
     - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 3660086234459692033, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
+    - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
       propertyPath: PatrolPoints
       value: 
       objectReference: {fileID: 11400000, guid: dca59c61dd87eec4dbfba5b77c5364d1, type: 2}
@@ -38136,6 +38172,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NormalSpawner (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 3660086234459692033, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
     - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
       propertyPath: PatrolPoints
       value: 
@@ -40204,6 +40244,10 @@ PrefabInstance:
       propertyPath: CameraManager
       value: 
       objectReference: {fileID: 1532498446}
+    - target: {fileID: 4486061239829371592, guid: 0a9e0f301bb921f47abf6600754309ce, type: 3}
+      propertyPath: _closeDistance
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4486061239829371592, guid: 0a9e0f301bb921f47abf6600754309ce, type: 3}
       propertyPath: MaxShotDistance
       value: 5
@@ -44505,6 +44549,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NormalSpawner
       objectReference: {fileID: 0}
+    - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 3660086234459692033, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
     - target: {fileID: 2969837229452090473, guid: e50207d4b5db05048ab873e13544a63a, type: 3}
       propertyPath: PatrolPoints
       value: 
@@ -49276,7 +49324,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5225897680563711730, guid: 65146de587b9e5c43be7fd7c0792d34d, type: 3}
       propertyPath: ShapeModule.radiusThickness
-      value: 1.0000
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5225897680563711730, guid: 65146de587b9e5c43be7fd7c0792d34d, type: 3}
       propertyPath: EmissionModule.rateOverTime.scalar

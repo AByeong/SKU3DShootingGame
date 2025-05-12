@@ -47,13 +47,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4772bdc30c1928c4ab397cdb7f222e01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Prefab: {fileID: 5574244657281963107, guid: f33d2ed7d96a9c646a994e5739d191e1, type: 3}
-  _initialPoolSize: 10
-  _allowGrowth: 0
+  EnemyPrefab:
+    m_AssetGUID: f33d2ed7d96a9c646a994e5739d191e1
+    m_SubObjectName: 
+    m_SubObjectGUID: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  SpawnPoint: {fileID: 7821445776007382140}
   PatrolPoints: {fileID: 0}
   SpawnSwitch: 1
   SpawnInterval: 2
   Radius: 0.1
+  InitialSize: 10
+  AllowGrowth: 1
 --- !u!1 &3769431570179680348
 GameObject:
   m_ObjectHideFlags: 0
